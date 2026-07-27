@@ -1,0 +1,8 @@
+fonts/*.ttf
+fonts/*.otf
+__pycache__/
+*.pyc
+.venv/
+venv/
+artifacts/eval_plots/
+*.egg-info/
