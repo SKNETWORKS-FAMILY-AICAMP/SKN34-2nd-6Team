@@ -11,7 +11,8 @@ import joblib
 from .column_map import CHANNEL_LABEL_BY_VALUE, MODEL_FEATURES, load_model_features
 from .preprocess import ColumnMappingError, load_upload_file, prepare_for_predict
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+# ml-backend/app/services/predict.py → repo root = parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 MODEL_CANDIDATES = [
     REPO_ROOT / "ML" / "XGBoost_model_v1.joblib",
     Path(__file__).resolve().parents[2] / "artifacts" / "XGBoost_model_v1.joblib",

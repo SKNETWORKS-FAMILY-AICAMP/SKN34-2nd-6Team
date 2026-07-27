@@ -17,7 +17,7 @@ uvicorn app.main:app --reload --port 8000
 ### 2) 프론트엔드
 
 ```bash
-cd donor-churn-dashboard
+cd donor-churn-dashboard   # 레포 루트 기준
 npm install
 npm run dev
 ```

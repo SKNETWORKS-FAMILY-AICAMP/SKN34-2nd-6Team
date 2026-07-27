@@ -9,7 +9,7 @@ React(`../donor-churn-dashboard`) 배치 스코어링용 FastAPI.
 ## 실행
 
 ```bash
-cd tetest/ml-backend
+cd ml-backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
