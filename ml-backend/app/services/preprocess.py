@@ -14,10 +14,13 @@ import pandas as pd
 
 from . import column_map
 from .column_map import (
+    CONTACT_LABELS,
+    PROFILE_USER_KEYS,
     RAW_REQUIRED_SURVEY,
     REQUIRED_USER_KEYS,
     USER_LABELS,
     USER_TO_SURVEY,
+    resolve_contact_key,
     resolve_user_key,
     survey_label,
 )
@@ -144,8 +147,73 @@ def prepare_for_predict(df_raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     return X, pd.to_numeric(info_raw, errors="coerce").fillna(7)
 
 
-def build_template_dataframe(n_examples: int = 2) -> pd.DataFrame:
-    """전략 A: 학습 원본 입력 전체 — 헤더는 사용자용 한글 라벨."""
+def _cell_str(value: object) -> str:
+    if value is None or (isinstance(value, float) and np.isnan(value)):
+        return ""
+    if pd.isna(value):
+        return ""
+    text = str(value).strip()
+    if text.lower() in {"nan", "none", "null"}:
+        return ""
+    return text
+
+
+def extract_contacts(df_raw: pd.DataFrame) -> list[dict[str, str]]:
+    """원본 DF에서 행별 email/phone 추출 (없으면 빈 문자열)."""
+    email_col = None
+    phone_col = None
+    for col in df_raw.columns:
+        key = resolve_contact_key(col)
+        if key == "email" and email_col is None:
+            email_col = col
+        elif key == "phone" and phone_col is None:
+            phone_col = col
+
+    rows: list[dict[str, str]] = []
+    for i in range(len(df_raw)):
+        email = _cell_str(df_raw.iloc[i][email_col]) if email_col is not None else ""
+        phone = _cell_str(df_raw.iloc[i][phone_col]) if phone_col is not None else ""
+        rows.append({"email": email, "phone": phone})
+    return rows
+
+
+def extract_profiles(df_raw: pd.DataFrame) -> list[dict[str, object]]:
+    """상세 패널용 주요 원본 필드 (한글 라벨 키)."""
+    col_to_user: dict[object, str] = {}
+    for col in df_raw.columns:
+        if resolve_contact_key(col):
+            continue
+        uk = resolve_user_key(col)
+        if uk and uk in PROFILE_USER_KEYS and uk not in col_to_user.values():
+            col_to_user[col] = uk
+
+    profiles: list[dict[str, object]] = []
+    for i in range(len(df_raw)):
+        profile: dict[str, object] = {}
+        for col, uk in col_to_user.items():
+            label = USER_LABELS.get(uk, uk)
+            val = df_raw.iloc[i][col]
+            if pd.isna(val):
+                continue
+            # numpy 타입 → JSON 직렬화 가능한 값
+            if isinstance(val, (np.integer,)):
+                profile[label] = int(val)
+            elif isinstance(val, (np.floating,)):
+                profile[label] = float(val)
+            else:
+                profile[label] = val.item() if hasattr(val, "item") else val
+        # PROFILE_USER_KEYS 순서 유지
+        ordered: dict[str, object] = {}
+        for uk in PROFILE_USER_KEYS:
+            label = USER_LABELS.get(uk, uk)
+            if label in profile:
+                ordered[label] = profile[label]
+        profiles.append(ordered)
+    return profiles
+
+
+def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
+    """전략 A: 학습 원본 입력 전체 — 헤더는 사용자용 한글 라벨 + 연락처."""
     base = {
         "has_children": 1,
         "age": 45,
@@ -167,9 +235,14 @@ def build_template_dataframe(n_examples: int = 2) -> pd.DataFrame:
     for i in range(1, 13):
         base[f"channel_{i}"] = 1 if i == 7 else 0
 
-    row2 = dict(base)
-    row2.update(
+    variants: list[dict] = [
         {
+            **base,
+            "email": "donor1@example.com",
+            "phone": "010-1234-5678",
+        },
+        {
+            **base,
             "has_children": 2,
             "age": 32,
             "marital": 1,
@@ -183,13 +256,70 @@ def build_template_dataframe(n_examples: int = 2) -> pd.DataFrame:
             "info_channel": 9,
             "donate_intent": 2,
             "know_hometown_giving": 2,
-        }
-    )
-    for i in range(1, 13):
-        row2[f"channel_{i}"] = 1 if i == 9 else 0
+            "email": "donor2@example.com",
+            "phone": "010-2345-6789",
+            **{f"channel_{i}": (1 if i == 9 else 0) for i in range(1, 13)},
+        },
+        {
+            **base,
+            "age": 58,
+            "marital": 3,
+            "gender": 1,
+            "region_group": 6,
+            "household_size": 2,
+            "employment": 3,
+            "income": 5_500_000,
+            "income_change": 3,
+            "education": 5,
+            "info_channel": 1,
+            "donate_intent": 1,
+            "email": "donor3@example.com",
+            "phone": "010-3456-7890",
+            **{f"channel_{i}": (1 if i == 1 else 0) for i in range(1, 13)},
+        },
+        {
+            **base,
+            "has_children": 1,
+            "age": 27,
+            "marital": 1,
+            "gender": 2,
+            "region_group": 3,
+            "household_size": 4,
+            "religion": 2,
+            "employment": 2,
+            "income": 3_200_000,
+            "info_channel": 5,
+            "donate_intent": 2,
+            "know_hometown_giving": 1,
+            "email": "donor4@example.com",
+            "phone": "010-4567-8901",
+            **{f"channel_{i}": (1 if i == 5 else 0) for i in range(1, 13)},
+        },
+        {
+            **base,
+            "age": 41,
+            "marital": 2,
+            "gender": 1,
+            "region_group": 4,
+            "household_size": 5,
+            "religion": 3,
+            "employment": 1,
+            "income": 6_800_000,
+            "income_change": 2,
+            "education": 6,
+            "info_channel": 6,
+            "donate_intent": 1,
+            "know_hometown_giving": 2,
+            "email": "donor5@example.com",
+            "phone": "010-5678-9012",
+            **{f"channel_{i}": (1 if i == 6 else 0) for i in range(1, 13)},
+        },
+    ]
 
-    rows = [base, row2][:n_examples]
+    rows = variants[: max(1, n_examples)]
     df = pd.DataFrame(rows)
-    # 컬럼 순서 = REQUIRED_USER_KEYS
-    df = df[REQUIRED_USER_KEYS]
-    return df.rename(columns=USER_LABELS)
+    feature_cols = list(REQUIRED_USER_KEYS)
+    contact_cols = list(CONTACT_LABELS.keys())
+    df = df[feature_cols + contact_cols]
+    rename = {**USER_LABELS, **CONTACT_LABELS}
+    return df.rename(columns=rename)

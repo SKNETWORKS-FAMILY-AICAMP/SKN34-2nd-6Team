@@ -19,6 +19,9 @@ class BatchResultRow(BaseModel):
     risk_level: str
     recommended_channel: str
     next_step: str
+    email: str = ""
+    phone: str = ""
+    profile: dict[str, Any] = Field(default_factory=dict)
 
 
 class BatchPredictResponse(BaseModel):

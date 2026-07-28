@@ -20,10 +20,10 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts'
-import Badge from '../common/Badge'
-import { REQUIRED_BATCH_COLUMNS } from '../../data/inferenceFields'
 import { predictBatch, templateDownloadUrl } from '../../services/api'
 import { requireLogin } from '../../utils/requireLogin'
+import DonorResultTable from './DonorResultTable'
+import DonorDetailDrawer from './DonorDetailDrawer'
 
 export default function BatchScoringPanel({
   mode = 'full',
@@ -38,6 +38,10 @@ export default function BatchScoringPanel({
   const [error, setError] = useState('')
   const [batch, setBatch] = useState(null)
   const [filterHigh, setFilterHigh] = useState(false)
+  const [selected, setSelected] = useState(null)
+  const [pausedIds, setPausedIds] = useState(() => new Set())
+  const [actionLogs, setActionLogs] = useState({})
+  const [toast, setToast] = useState(null)
 
   const rows = useMemo(() => {
     if (!batch?.results) return []
@@ -45,6 +49,29 @@ export default function BatchScoringPanel({
     if (filterHigh) return scored.filter((r) => r.risk_level === 'High')
     return scored
   }, [batch, filterHigh])
+
+  const showToast = (message) => {
+    setToast(message)
+    window.setTimeout(() => setToast(null), 2800)
+  }
+
+  const pushLog = (rowIndex, label) => {
+    const at = new Date().toLocaleTimeString('ko-KR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    setActionLogs((prev) => {
+      const list = prev[rowIndex] || []
+      return {
+        ...prev,
+        [rowIndex]: [{ id: `${Date.now()}-${label}`, label, at }, ...list].slice(
+          0,
+          8,
+        ),
+      }
+    })
+  }
 
   const guardAction = (e) => {
     if (isPreview && !isAuthenticated) {
@@ -68,11 +95,52 @@ export default function BatchScoringPanel({
     try {
       const data = await predictBatch(file)
       setBatch(data)
+      setSelected(null)
+      setPausedIds(new Set())
+      setActionLogs({})
     } catch (err) {
-      setError(err?.message || '배치 예측에 실패했습니다. API 서버를 확인하세요.')
+      const raw = String(err?.message || '')
+      const isColumnError =
+        /필수 컬럼|피처 불일치|ColumnMapping|400/.test(raw) ||
+        raw.includes('파일을 읽을 수 없습니다')
+      setError(
+        isColumnError
+          ? '오른쪽 위의 「템플릿 CSV」를 다운로드한 뒤, 예시 형식에 맞춰 데이터를 작성해 다시 업로드해 주세요.'
+          : '배치 예측에 실패했습니다. 잠시 후 다시 시도하거나 API 서버 상태를 확인해 주세요.',
+      )
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSms = () => {
+    if (!selected?.phone) return
+    showToast(`${selected.phone}로 문자 발송 요청을 접수했습니다.`)
+    pushLog(selected.row_index, '문자 전송')
+  }
+
+  const handleEmail = () => {
+    if (!selected?.email) return
+    showToast(`${selected.email}로 이메일 발송 요청을 접수했습니다.`)
+    pushLog(selected.row_index, '이메일 전송')
+  }
+
+  const handleTogglePause = () => {
+    if (!selected) return
+    const id = selected.row_index
+    setPausedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+        showToast(`행 #${id} 일시정지를 해제했습니다.`)
+        pushLog(id, '일시정지 해제')
+      } else {
+        next.add(id)
+        showToast(`행 #${id}을(를) 일시정지했습니다.`)
+        pushLog(id, '일시정지')
+      }
+      return next
+    })
   }
 
   return (
@@ -91,11 +159,6 @@ export default function BatchScoringPanel({
         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
           기부자 관리 · 배치 스코어링
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate-500">
-          파일을 업로드하면 이탈 확률을 계산하고, 고위험군에게는{' '}
-          <strong className="font-semibold text-slate-700">기부정보 습득경로</strong>로
-          캠페인 발송을 권고합니다.
-        </p>
       </header>
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -126,13 +189,11 @@ export default function BatchScoringPanel({
           )}
         </div>
 
-        <ul className="mt-4 flex flex-wrap gap-1.5">
-          {REQUIRED_BATCH_COLUMNS.map((c) => (
-            <li key={c.key}>
-              <Badge variant="neutral">{c.label}</Badge>
-            </li>
-          ))}
-        </ul>
+        <p className="mt-4 max-w-2xl text-sm text-slate-500">
+          파일을 업로드하면 이탈 확률을 계산하고, 고위험군에게는{' '}
+          <strong className="font-semibold text-slate-700">기부정보 습득경로</strong>로
+          캠페인 발송을 권고합니다.
+        </p>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {isPreview ? (
@@ -220,7 +281,7 @@ export default function BatchScoringPanel({
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-sm font-semibold text-slate-900">
-                3. 결과 (이탈확률 내림차순)
+                3. 결과 (이탈확률 내림차순) · 행 클릭 시 상세
               </h2>
               <button
                 type="button"
@@ -236,53 +297,34 @@ export default function BatchScoringPanel({
               </button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-                    <th className="px-2 py-2 font-medium">#</th>
-                    <th className="px-2 py-2 font-medium">확률</th>
-                    <th className="px-2 py-2 font-medium">위험</th>
-                    <th className="px-2 py-2 font-medium">권장 채널</th>
-                    <th className="px-2 py-2 font-medium">Next Step</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r, i) => (
-                    <tr key={`${r.row_index}-${i}`} className="border-b border-slate-50">
-                      <td className="px-2 py-2.5 text-slate-400">{r.row_index}</td>
-                      <td className="px-2 py-2.5 font-semibold text-slate-900">
-                        {r.probability_pct}%
-                      </td>
-                      <td className="px-2 py-2.5">
-                        <Badge
-                          variant={
-                            r.risk_level === 'High'
-                              ? 'danger'
-                              : r.risk_level === 'Medium'
-                                ? 'warning'
-                                : 'success'
-                          }
-                        >
-                          {r.risk_level}
-                        </Badge>
-                      </td>
-                      <td className="px-2 py-2.5 text-slate-700">
-                        {r.recommended_channel}
-                      </td>
-                      <td className="max-w-md px-2 py-2.5 text-xs leading-relaxed text-slate-600">
-                        {r.next_step}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!rows.length ? (
-                <p className="py-8 text-center text-sm text-slate-400">표시할 행이 없습니다.</p>
-              ) : null}
-            </div>
+            <DonorResultTable
+              rows={rows}
+              pausedIds={pausedIds}
+              selectedRowIndex={selected?.row_index}
+              onSelect={setSelected}
+            />
           </section>
         </>
+      ) : null}
+
+      <DonorDetailDrawer
+        open={Boolean(selected)}
+        row={selected}
+        paused={selected ? pausedIds.has(selected.row_index) : false}
+        actionLogs={selected ? actionLogs[selected.row_index] || [] : []}
+        onClose={() => setSelected(null)}
+        onSms={handleSms}
+        onEmail={handleEmail}
+        onTogglePause={handleTogglePause}
+      />
+
+      {toast ? (
+        <div
+          role="status"
+          className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg"
+        >
+          {toast}
+        </div>
       ) : null}
     </div>
   )

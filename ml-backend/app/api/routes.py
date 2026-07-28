@@ -33,7 +33,7 @@ def health() -> HealthResponse:
 
 @router.get("/api/v1/template/csv")
 def download_template() -> Response:
-    df = build_template_dataframe(3)
+    df = build_template_dataframe(5)
     csv_bytes = df.to_csv(index=False).encode("utf-8-sig")
     return Response(
         content=csv_bytes,

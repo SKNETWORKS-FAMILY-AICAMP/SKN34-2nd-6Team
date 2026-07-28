@@ -164,6 +164,52 @@ CHANNEL_LABEL_BY_VALUE: dict[int, str] = {
 
 REQUIRED_USER_KEYS: list[str] = list(USER_TO_SURVEY.keys())
 
+# 후속 조치용 연락처 — 모델 피처가 아님 (passthrough)
+CONTACT_LABELS: dict[str, str] = {
+    "email": "이메일",
+    "phone": "전화번호",
+}
+CONTACT_ALIASES: dict[str, str] = {}
+for _ck, _clabel in CONTACT_LABELS.items():
+    CONTACT_ALIASES[_ck] = _ck
+    CONTACT_ALIASES[_ck.lower()] = _ck
+    CONTACT_ALIASES[_clabel] = _ck
+    CONTACT_ALIASES[_clabel.replace(" ", "")] = _ck
+CONTACT_ALIASES["mobile"] = "phone"
+CONTACT_ALIASES["tel"] = "phone"
+CONTACT_ALIASES["휴대폰"] = "phone"
+CONTACT_ALIASES["휴대전화"] = "phone"
+CONTACT_ALIASES["e-mail"] = "email"
+CONTACT_ALIASES["메일"] = "email"
+
+# 상세 패널용 주요 프로필 키 (표시 순서)
+PROFILE_USER_KEYS: list[str] = [
+    "age",
+    "gender",
+    "marital",
+    "has_children",
+    "household_size",
+    "region_group",
+    "employment",
+    "income",
+    "education",
+    "info_channel",
+    "donate_intent",
+]
+
+
+def resolve_contact_key(column_name: str) -> str | None:
+    raw = str(column_name).strip()
+    if raw in CONTACT_ALIASES:
+        return CONTACT_ALIASES[raw]
+    collapsed = raw.replace(" ", "")
+    if collapsed in CONTACT_ALIASES:
+        return CONTACT_ALIASES[collapsed]
+    lower = raw.lower()
+    if lower in CONTACT_ALIASES:
+        return CONTACT_ALIASES[lower]
+    return None
+
 
 def resolve_user_key(column_name: str) -> str | None:
     raw = str(column_name).strip()

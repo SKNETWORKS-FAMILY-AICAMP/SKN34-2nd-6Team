@@ -9,7 +9,13 @@ from typing import Any
 import joblib
 
 from .column_map import CHANNEL_LABEL_BY_VALUE, MODEL_FEATURES, load_model_features
-from .preprocess import ColumnMappingError, load_upload_file, prepare_for_predict
+from .preprocess import (
+    ColumnMappingError,
+    extract_contacts,
+    extract_profiles,
+    load_upload_file,
+    prepare_for_predict,
+)
 
 # ml-backend/app/services/predict.py → repo root = parents[3]
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -118,6 +124,8 @@ def score_batch(filename: str, content: bytes) -> dict[str, Any]:
         raise ColumnMappingError("업로드 파일에 행이 없습니다.")
 
     X, info_raw = prepare_for_predict(raw)
+    contacts = extract_contacts(raw)
+    profiles = extract_profiles(raw)
 
     # 학습 feature_names 와 일치
     extra = [c for c in X.columns if c not in feature_names]
@@ -143,6 +151,8 @@ def score_batch(filename: str, content: bytes) -> dict[str, Any]:
         ch_label = channel_label_from_value(ch_val)
         if level == "High":
             channel_counter[ch_label] = channel_counter.get(ch_label, 0) + 1
+        contact = contacts[i] if i < len(contacts) else {"email": "", "phone": ""}
+        profile = profiles[i] if i < len(profiles) else {}
         results.append(
             {
                 "row_index": int(i + 1),
@@ -151,6 +161,9 @@ def score_batch(filename: str, content: bytes) -> dict[str, Any]:
                 "risk_level": level,
                 "recommended_channel": ch_label,
                 "next_step": next_step_text(level, ch_label),
+                "email": contact.get("email", ""),
+                "phone": contact.get("phone", ""),
+                "profile": profile,
             }
         )
 
