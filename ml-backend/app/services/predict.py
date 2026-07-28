@@ -151,7 +151,7 @@ def score_batch(filename: str, content: bytes) -> dict[str, Any]:
         ch_label = channel_label_from_value(ch_val)
         if level == "High":
             channel_counter[ch_label] = channel_counter.get(ch_label, 0) + 1
-        contact = contacts[i] if i < len(contacts) else {"email": "", "phone": ""}
+        contact = contacts[i] if i < len(contacts) else {"name": "", "email": "", "phone": ""}
         profile = profiles[i] if i < len(profiles) else {}
         results.append(
             {
@@ -161,6 +161,7 @@ def score_batch(filename: str, content: bytes) -> dict[str, Any]:
                 "risk_level": level,
                 "recommended_channel": ch_label,
                 "next_step": next_step_text(level, ch_label),
+                "name": contact.get("name", ""),
                 "email": contact.get("email", ""),
                 "phone": contact.get("phone", ""),
                 "profile": profile,

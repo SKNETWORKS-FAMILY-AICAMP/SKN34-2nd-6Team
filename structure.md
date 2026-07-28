@@ -143,7 +143,7 @@ ml-backend/app/
 | 1 | 템플릿 다운로드 / 파일 선택 / 배치 예측 실행 |
 | 2 | 요약 숫자 + 고위험군 권장 채널 차트 |
 | 3 | 결과 리스트 (이탈확률 높은 순) |
-| 4 | 행 클릭 → 오른쪽 상세 + 문자/이메일/일시정지(시뮬레이션) |
+| 4 | 행 클릭 → 오른쪽 상세 + AI 문자·이메일 초안/쉬어가기 제안·요청 반영(시뮬레이션) |
 
 호출 코드: `services/api.js` → `predictBatch(file)`  
 UI: `components/daeho/BatchScoringPanel.jsx`

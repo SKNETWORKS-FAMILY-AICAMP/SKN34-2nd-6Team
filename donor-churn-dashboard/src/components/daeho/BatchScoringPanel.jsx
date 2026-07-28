@@ -24,6 +24,8 @@ import { predictBatch, templateDownloadUrl } from '../../services/api'
 import { requireLogin } from '../../utils/requireLogin'
 import DonorResultTable from './DonorResultTable'
 import DonorDetailDrawer from './DonorDetailDrawer'
+import RestSuggestModal from './RestSuggestModal'
+import RestConfirmModal from './RestConfirmModal'
 
 export default function BatchScoringPanel({
   mode = 'full',
@@ -39,9 +41,13 @@ export default function BatchScoringPanel({
   const [batch, setBatch] = useState(null)
   const [filterHigh, setFilterHigh] = useState(false)
   const [selected, setSelected] = useState(null)
-  const [pausedIds, setPausedIds] = useState(() => new Set())
+  const [restingIds, setRestingIds] = useState(() => new Set())
+  const [suggestedRestIds, setSuggestedRestIds] = useState(() => new Set())
+  const [restMeta, setRestMeta] = useState({})
   const [actionLogs, setActionLogs] = useState({})
   const [toast, setToast] = useState(null)
+  const [suggestOpen, setSuggestOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const rows = useMemo(() => {
     if (!batch?.results) return []
@@ -96,8 +102,12 @@ export default function BatchScoringPanel({
       const data = await predictBatch(file)
       setBatch(data)
       setSelected(null)
-      setPausedIds(new Set())
+      setRestingIds(new Set())
+      setSuggestedRestIds(new Set())
+      setRestMeta({})
       setActionLogs({})
+      setSuggestOpen(false)
+      setConfirmOpen(false)
     } catch (err) {
       const raw = String(err?.message || '')
       const isColumnError =
@@ -113,34 +123,65 @@ export default function BatchScoringPanel({
     }
   }
 
-  const handleSms = () => {
+  const handleSendSms = () => {
     if (!selected?.phone) return
     showToast(`${selected.phone}로 문자 발송 요청을 접수했습니다.`)
-    pushLog(selected.row_index, '문자 전송')
+    pushLog(selected.row_index, 'AI 문자 발송')
   }
 
-  const handleEmail = () => {
+  const handleSendEmail = () => {
     if (!selected?.email) return
     showToast(`${selected.email}로 이메일 발송 요청을 접수했습니다.`)
-    pushLog(selected.row_index, '이메일 전송')
+    pushLog(selected.row_index, 'AI 이메일 발송')
   }
 
-  const handleTogglePause = () => {
+  const handleSuggestRest = ({ channel, months }) => {
     if (!selected) return
     const id = selected.row_index
-    setPausedIds((prev) => {
+    setSuggestedRestIds((prev) => new Set(prev).add(id))
+    setRestMeta((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        suggestedAt: Date.now(),
+        suggestedChannel: channel,
+        suggestedMonths: months,
+      },
+    }))
+    showToast('쉬어가기 제안을 발송했습니다.')
+    pushLog(id, `쉬어가기 제안 (${channel}, ${months}개월)`)
+    setSuggestOpen(false)
+  }
+
+  const handleConfirmRest = ({ confirmedVia, months, note }) => {
+    if (!selected) return
+    const id = selected.row_index
+    setRestingIds((prev) => new Set(prev).add(id))
+    setRestMeta((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        months,
+        confirmedVia,
+        note,
+      },
+    }))
+    showToast('잠시 쉬어가기로 반영했습니다.')
+    pushLog(id, `쉬어가기 요청 반영 (${confirmedVia}, ${months}개월)`)
+    setConfirmOpen(false)
+  }
+
+  const handleResume = () => {
+    if (!selected) return
+    if (!window.confirm('후원을 다시 시작할까요?')) return
+    const id = selected.row_index
+    setRestingIds((prev) => {
       const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-        showToast(`행 #${id} 일시정지를 해제했습니다.`)
-        pushLog(id, '일시정지 해제')
-      } else {
-        next.add(id)
-        showToast(`행 #${id}을(를) 일시정지했습니다.`)
-        pushLog(id, '일시정지')
-      }
+      next.delete(id)
       return next
     })
+    showToast('다시 시작했습니다.')
+    pushLog(id, '다시 시작')
   }
 
   return (
@@ -195,7 +236,7 @@ export default function BatchScoringPanel({
           캠페인 발송을 권고합니다.
         </p>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           {isPreview ? (
             <button
               type="button"
@@ -299,7 +340,7 @@ export default function BatchScoringPanel({
 
             <DonorResultTable
               rows={rows}
-              pausedIds={pausedIds}
+              restingIds={restingIds}
               selectedRowIndex={selected?.row_index}
               onSelect={setSelected}
             />
@@ -310,12 +351,34 @@ export default function BatchScoringPanel({
       <DonorDetailDrawer
         open={Boolean(selected)}
         row={selected}
-        paused={selected ? pausedIds.has(selected.row_index) : false}
+        resting={selected ? restingIds.has(selected.row_index) : false}
+        suggested={selected ? suggestedRestIds.has(selected.row_index) : false}
         actionLogs={selected ? actionLogs[selected.row_index] || [] : []}
-        onClose={() => setSelected(null)}
-        onSms={handleSms}
-        onEmail={handleEmail}
-        onTogglePause={handleTogglePause}
+        onClose={() => {
+          setSelected(null)
+          setSuggestOpen(false)
+          setConfirmOpen(false)
+        }}
+        onSendSms={handleSendSms}
+        onSendEmail={handleSendEmail}
+        onSuggestRest={() => setSuggestOpen(true)}
+        onConfirmRest={() => setConfirmOpen(true)}
+        onResume={handleResume}
+      />
+
+      <RestSuggestModal
+        open={suggestOpen && Boolean(selected)}
+        donorName={selected?.name}
+        email={selected?.email}
+        phone={selected?.phone}
+        onClose={() => setSuggestOpen(false)}
+        onSubmit={handleSuggestRest}
+      />
+
+      <RestConfirmModal
+        open={confirmOpen && Boolean(selected)}
+        onClose={() => setConfirmOpen(false)}
+        onSubmit={handleConfirmRest}
       />
 
       {toast ? (

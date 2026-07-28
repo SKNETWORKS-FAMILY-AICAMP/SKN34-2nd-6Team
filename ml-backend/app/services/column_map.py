@@ -164,8 +164,9 @@ CHANNEL_LABEL_BY_VALUE: dict[int, str] = {
 
 REQUIRED_USER_KEYS: list[str] = list(USER_TO_SURVEY.keys())
 
-# 후속 조치용 연락처 — 모델 피처가 아님 (passthrough)
+# 후속 조치용 passthrough — 모델 피처가 아님
 CONTACT_LABELS: dict[str, str] = {
+    "name": "이름",
     "email": "이메일",
     "phone": "전화번호",
 }
@@ -181,6 +182,9 @@ CONTACT_ALIASES["휴대폰"] = "phone"
 CONTACT_ALIASES["휴대전화"] = "phone"
 CONTACT_ALIASES["e-mail"] = "email"
 CONTACT_ALIASES["메일"] = "email"
+CONTACT_ALIASES["donor_name"] = "name"
+CONTACT_ALIASES["성명"] = "name"
+CONTACT_ALIASES["성함"] = "name"
 
 # 상세 패널용 주요 프로필 키 (표시 순서)
 PROFILE_USER_KEYS: list[str] = [
