@@ -25,8 +25,6 @@ const KAKAO_STORAGE_KEY = 'kakaoUser'                           //[feat: [MLP-4]
 
 
 
-const AuthContext = createContext(null)
-
 // [refactor: [MLP-4] 코드 삭제] function readStoredAuth() {
 // [refactor: [MLP-4] 코드 삭제] try {
 // [refactor: [MLP-4] 코드 삭제]    return localStorage.getItem(STORAGE_KEY) === 'true'
