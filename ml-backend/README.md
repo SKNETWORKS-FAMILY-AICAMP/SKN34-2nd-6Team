@@ -2,7 +2,7 @@
 
 React(`../donor-churn-dashboard`) 배치 스코어링용 FastAPI.
 
-**기준 모델:** 레포 루트 `ML/XGBoost_model_v1.joblib` (재학습 없음)  
+**기준 모델:** 레포 루트 `ML/XGBoost_model_v2.joblib` (재학습 없음)  
 **전략 A:** 템플릿을 학습 원본 입력(28컬럼, 전처리 후 27피처)에 맞게 확장.  
 사용자 표시명 ↔ 설문 코드 매핑: `app/services/column_map.py`
 

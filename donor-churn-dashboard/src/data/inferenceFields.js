@@ -1,5 +1,5 @@
 /**
- * 추론/배치 템플릿 — 학습 모델(XGBoost_model_v1, 27 features) 원본 입력에 맞춤 (전략 A)
+ * 추론/배치 템플릿 — 학습 모델(XGBoost_model_v2, 27 features) 원본 입력에 맞춤 (전략 A)
  * 백엔드 column_map.py 와 동기화
  */
 export const CHANNEL_OPTIONS = [
@@ -127,32 +127,27 @@ export const inferenceFieldMeta = {
   channel_10: { label: '습득경로_인터넷검색', options: [{ value: 0, label: '아니오' }, { value: 1, label: '예' }], default: 0 },
   channel_11: { label: '습득경로_블록체인', options: [{ value: 0, label: '아니오' }, { value: 1, label: '예' }], default: 0 },
   channel_12: { label: '습득경로_직장공헌', options: [{ value: 0, label: '아니오' }, { value: 1, label: '예' }], default: 0 },
-  org_criteria: {
-    label: '단체 선택 시 가장 중요한 기준',
-    options: [
-      { value: 1, label: '인지도' },
-      { value: 2, label: '투명성·신뢰성' },
-      { value: 3, label: '지인 소개/권유' },
-      { value: 4, label: '활동 분야·수혜자 관심' },
-      { value: 5, label: '직접 홍보/요청' },
-    ],
+  reason_for_donation: {
+    label: '기부이유',
+    default: 1,
+  },
+  volunteer_count: {
+    label: '자원 봉사 횟수',
+    type: 'int',
+    min: 0,
+    step: 1,
     default: 2,
   },
-  info_channel: {
-    label: '기부정보 습득경로(주경로)',
-    options: CHANNEL_OPTIONS,
-    default: 7,
-  },
-  donate_intent: {
-    label: '올해 금전 기부 의향',
+  know_hometown_giving: {
+    label: '고향사랑기부제 인지 여부',
     options: [
       { value: 1, label: '예' },
       { value: 2, label: '아니오' },
     ],
     default: 1,
   },
-  know_hometown_giving: {
-    label: '고향사랑기부제 인지 여부',
+  giving_culuter: {
+    label: '기부 참여 문화 수준',
     options: [
       { value: 1, label: '예' },
       { value: 2, label: '아니오' },
