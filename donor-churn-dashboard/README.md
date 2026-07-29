@@ -6,7 +6,7 @@ React 대시보드 + Python ML 백엔드(`../ml-backend`) 연동 프로젝트입
 
 ### 1) ML API (팀 학습 모델)
 
-`ML/XGBoost_model_v1.joblib` 로드 (재학습 없음). 템플릿 → 설문 코드 매핑 후 전처리·predict.
+`ML/XGBoost_model_v2.joblib` 로드 (재학습 없음). 템플릿 → 설문 코드 매핑 후 전처리·predict.
 
 ```bash
 cd ../ml-backend

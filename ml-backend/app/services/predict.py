@@ -1,4 +1,4 @@
-"""팀 학습 모델(ML/XGBoost_model_v1.joblib) 로드 + 배치 스코어링."""
+"""팀 학습 모델(ML/XGBoost_model_v2.joblib) 로드 + 배치 스코어링."""
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ from .preprocess import (
 # ml-backend/app/services/predict.py → repo root = parents[3]
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MODEL_CANDIDATES = [
-    REPO_ROOT / "ML" / "XGBoost_model_v1.joblib",
-    Path(__file__).resolve().parents[2] / "artifacts" / "XGBoost_model_v1.joblib",
+    REPO_ROOT / "ML" / "XGBoost_model_v2.joblib",
+    Path(__file__).resolve().parents[2] / "artifacts" / "XGBoost_model_v2.joblib",
 ]
 ARTIFACTS_DIR = Path(__file__).resolve().parents[2] / "artifacts"
 FEATURE_NAMES_PATH = ARTIFACTS_DIR / "feature_names.json"
@@ -34,13 +34,22 @@ _meta: dict[str, Any] = {}
 _model_path: Path | None = None
 
 
+def normalize_feature_name(name: Any) -> str:
+    """v2 joblib에 CP949 바이트가 Latin-1 문자열로 저장된 경우 한글로 복원."""
+    text = str(name)
+    try:
+        return text.encode("latin-1").decode("cp949")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return text
+
+
 def resolve_model_path() -> Path:
     for p in MODEL_CANDIDATES:
         if p.exists():
             return p
     tried = ", ".join(str(p) for p in MODEL_CANDIDATES)
     raise FileNotFoundError(
-        "팀 학습 모델이 없습니다. 다음 경로에 ML/XGBoost_model_v1.joblib 을 두세요: "
+        "팀 학습 모델이 없습니다. 다음 경로에 ML/XGBoost_model_v2.joblib 을 두세요: "
         + tried
         + " (합성/template 모델은 사용하지 않습니다)"
     )
@@ -54,10 +63,13 @@ def get_model():
         _model_path = path
         names_attr = getattr(_model, "feature_names_in_", None)
         if names_attr is not None:
-            names = list(names_attr)
+            names = [normalize_feature_name(name) for name in names_attr]
         else:
             try:
-                names = list(_model.get_booster().feature_names or [])
+                names = [
+                    normalize_feature_name(name)
+                    for name in (_model.get_booster().feature_names or [])
+                ]
             except Exception:  # noqa: BLE001
                 names = list(MODEL_FEATURES)
         ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -69,7 +81,7 @@ def get_model():
 
         cm.MODEL_FEATURES = names
         _meta = {
-            "model_name": "XGBoost_model_v1",
+            "model_name": "XGBoost_model_v2",
             "path": str(path),
             "n_features": len(names),
             "feature_names": names,
@@ -175,7 +187,7 @@ def score_batch(filename: str, content: bytes) -> dict[str, Any]:
     ]
 
     return {
-        "model_name": meta.get("model_name", "XGBoost_model_v1"),
+        "model_name": meta.get("model_name", "XGBoost_model_v2"),
         "threshold": high,
         "n_total": int(len(raw)),
         "n_scored": int(len(results)),

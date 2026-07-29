@@ -27,7 +27,7 @@
 SKN34-2nd-6Team/
 ├── donor-churn-dashboard/   ← React 프론트 (화면)
 ├── ml-backend/              ← FastAPI (예측 API)
-├── ML/                      ← 학습된 모델 파일 (XGBoost_model_v1.joblib)
+├── ML/                      ← 학습된 모델 파일 (XGBoost_model_v2.joblib)
 ├── src/util/                ← 원래 학습/전처리 스크립트 참고용
 ├── docs/                    ← 깃/커밋 가이드 등
 └── README.md                ← 팀원 이름
@@ -111,7 +111,7 @@ ml-backend/app/
 1. **입력:** 사용자가 올린 CSV/Excel  
    - 피처 컬럼: 연령, 성별, 소득, 기부정보 습득경로 등 (한글 라벨 OK)  
    - 연락처(모델에 안 넣음): `이메일`, `전화번호` → 화면 후속 조치용으로만 전달
-2. **모델:** `ML/XGBoost_model_v1.joblib`  
+2. **모델:** `ML/XGBoost_model_v2.joblib`  
    - 전처리 후 **27개 피처**로 이탈 확률(0~1) 예측
 
 ### 변환 파이프라인 (쉽게)
@@ -150,7 +150,7 @@ UI: `components/daeho/BatchScoringPanel.jsx`
 
 ### 5-1. joblib 모델은 어떻게 쓰이나? (쉽게)
 
-> `ML/XGBoost_model_v1.joblib` 은 **엑셀/CSV 데이터가 아니라**,  
+> `ML/XGBoost_model_v2.joblib` 은 **엑셀/CSV 데이터가 아니라**,  
 > 미리 학습해 둔 **XGBoost 이탈 예측 모델**을 파일로 저장한 것이다.  
 > 앱에서는 **다시 학습하지 않고**, 불러와서 **점수만 매긴다**.
 
@@ -185,7 +185,7 @@ UI: `components/daeho/BatchScoringPanel.jsx`
 
 - joblib **안을 열어 데이터를 조회·수정하지 않는다.**
 - 프론트(React)는 joblib을 직접 쓰지 않고, **백엔드 API 결과만** 받는다.
-- 모델 파일 위치: 주로 `ML/XGBoost_model_v1.joblib`
+- 모델 파일 위치: 주로 `ML/XGBoost_model_v2.joblib`
 
 ### 5-2. 사용자용 컬럼 vs 모델용 컬럼 
 
