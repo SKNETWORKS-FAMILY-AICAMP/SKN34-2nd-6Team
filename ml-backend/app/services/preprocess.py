@@ -139,12 +139,9 @@ def prepare_for_predict(df_raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
         pass
 
     X = to_model_matrix(renamed)
-    info_raw = (
-        renamed["문7"].copy()
-        if "문7" in renamed.columns
-        else pd.Series([7] * len(renamed), index=renamed.index)
-    )
-    return X, pd.to_numeric(info_raw, errors="coerce").fillna(7)
+    # v2 학습 컬럼에는 더 이상 주 정보 습득경로가 없으므로 권장 채널은 기본값을 사용한다.
+    channel_raw = pd.Series([7] * len(renamed), index=renamed.index)
+    return X, channel_raw
 
 
 def _cell_str(value: object) -> str:
@@ -226,10 +223,10 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
         "income": 4_000_000,
         "income_change": 2,
         "education": 4,
-        "org_criteria": 2,
-        "info_channel": 7,
-        "donate_intent": 1,
+        "reason_for_donation": 1,
+        "volunteer_count": 2,
         "know_hometown_giving": 1,
+        "giving_culuter": 1,
     }
     # 문3 multi-hot: 주경로만 1
     for i in range(1, 13):
@@ -253,9 +250,10 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "employment": 5,
             "income": 2_500_000,
             "income_change": 1,
-            "info_channel": 9,
-            "donate_intent": 2,
+            "reason_for_donation": 2,
+            "volunteer_count": 0,
             "know_hometown_giving": 2,
+            "giving_culuter": 2,
             "email": "donor2@example.com",
             "phone": "010-2345-6789",
             **{f"channel_{i}": (1 if i == 9 else 0) for i in range(1, 13)},
@@ -271,8 +269,9 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "income": 5_500_000,
             "income_change": 3,
             "education": 5,
-            "info_channel": 1,
-            "donate_intent": 1,
+            "reason_for_donation": 3,
+            "volunteer_count": 4,
+            "know_hometown_giving": 1,
             "email": "donor3@example.com",
             "phone": "010-3456-7890",
             **{f"channel_{i}": (1 if i == 1 else 0) for i in range(1, 13)},
@@ -288,9 +287,10 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "religion": 2,
             "employment": 2,
             "income": 3_200_000,
-            "info_channel": 5,
-            "donate_intent": 2,
+            "reason_for_donation": 4,
+            "volunteer_count": 1,
             "know_hometown_giving": 1,
+            "giving_culuter": 1,
             "email": "donor4@example.com",
             "phone": "010-4567-8901",
             **{f"channel_{i}": (1 if i == 5 else 0) for i in range(1, 13)},
@@ -307,9 +307,10 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "income": 6_800_000,
             "income_change": 2,
             "education": 6,
-            "info_channel": 6,
-            "donate_intent": 1,
+            "reason_for_donation": 5,
+            "volunteer_count": 7,
             "know_hometown_giving": 2,
+            "giving_culuter": 2,
             "email": "donor5@example.com",
             "phone": "010-5678-9012",
             **{f"channel_{i}": (1 if i == 6 else 0) for i in range(1, 13)},
@@ -322,4 +323,9 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
     contact_cols = list(CONTACT_LABELS.keys())
     df = df[feature_cols + contact_cols]
     rename = {**USER_LABELS, **CONTACT_LABELS}
-    return df.rename(columns=rename)
+    df = df.rename(columns=rename)
+    volunteer_label = USER_LABELS["volunteer_count"]
+    df[volunteer_label] = pd.to_numeric(
+        df[volunteer_label], errors="raise"
+    ).astype("int64")
+    return df

@@ -1,7 +1,7 @@
 """
 사용자용(영문 키 / 한글 라벨) ↔ 모델용(학습 설문 코드) 단일 매핑 소스.
 
-기준: ML/XGBoost_model_v1.joblib (get_data_v2, 27 features)
+기준: ML/XGBoost_model_v2.joblib (get_data_v2, 27 features)
 전략 A: 템플릿을 학습 원본 입력 컬럼에 맞게 확장 (부족 피처 0-fill 재학습 없음)
 """
 
@@ -52,10 +52,10 @@ USER_TO_SURVEY: dict[str, str] = {
     "channel_10": "문3_10",
     "channel_11": "문3_11",
     "channel_12": "문3_12",
-    "org_criteria": "문6_01",
-    "info_channel": "문7",
-    "donate_intent": "문40",
+    "reason_for_donation": "문7",
+    "volunteer_count": "문40",
     "know_hometown_giving": "문42",
+    "giving_culuter": "문31",
 }
 
 USER_LABELS: dict[str, str] = {
@@ -82,10 +82,10 @@ USER_LABELS: dict[str, str] = {
     "channel_10": "습득경로_인터넷검색",
     "channel_11": "습득경로_블록체인",
     "channel_12": "습득경로_직장공헌",
-    "org_criteria": "단체 선택 시 가장 중요한 기준",
-    "info_channel": "기부정보 습득경로(주경로)",
-    "donate_intent": "올해 금전 기부 의향",
+    "reason_for_donation": "기부이유",
+    "volunteer_count": "자원 봉사 횟수",
     "know_hometown_giving": "고향사랑기부제 인지 여부",
+    "giving_culuter": "기부 참여 문화 수준",
 }
 
 # 학습 모델 feature_names_in_ (artifacts/feature_names.json 과 동기화)
@@ -119,10 +119,10 @@ def load_model_features() -> list[str]:
         "문3_10",
         "문3_11",
         "문3_12",
-        "문6_01",
         "문7",
         "문40",
         "문42",
+        "문31",
         "배문6_정리",
     ]
 
@@ -143,10 +143,10 @@ RAW_REQUIRED_SURVEY: list[str] = [
     "배문7",
     "배문8",
     *[f"문3_{i}" for i in range(1, 13)],
-    "문6_01",
     "문7",
     "문40",
     "문42",
+    "문31",
 ]
 
 ALIAS_TO_USER: dict[str, str] = {}
@@ -193,8 +193,8 @@ PROFILE_USER_KEYS: list[str] = [
     "employment",
     "income",
     "education",
-    "info_channel",
-    "donate_intent",
+    "volunteer_count",
+    "know_hometown_giving",
 ]
 
 
