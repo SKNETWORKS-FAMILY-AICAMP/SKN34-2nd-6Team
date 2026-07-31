@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import Badge from '../common/Badge'
 import FollowUpActions from './FollowUpActions'
+import { riskLabel } from '../../utils/riskLabels'
 import { generateCopyDraft } from '../../services/api'
 
 export default function DonorDetailDrawer({
@@ -124,14 +125,14 @@ export default function DonorDetailDrawer({
 
         <header className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
-              Donor Detail
+            <p className="text-xs font-semibold tracking-wide text-teal-700">
+              기부자 상세
             </p>
             <h2 className="mt-1 text-lg font-bold text-slate-900">
-              {row.name?.trim() ? row.name : `행 #${row.row_index}`}
+              {row.name?.trim() ? row.name : `번호 ${row.row_index}`}
             </h2>
             {row.name?.trim() ? (
-              <p className="text-xs text-slate-400">행 #{row.row_index}</p>
+              <p className="text-xs text-slate-400">번호 {row.row_index}</p>
             ) : null}
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <Badge
@@ -143,7 +144,7 @@ export default function DonorDetailDrawer({
                       : 'success'
                 }
               >
-                {row.risk_level}
+                {riskLabel(row.risk_level)}
               </Badge>
               {resting ? (
                 <Badge variant="warning">잠시 쉬어가는 중</Badge>
@@ -163,13 +164,13 @@ export default function DonorDetailDrawer({
         <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
           <dl className="grid grid-cols-2 gap-3">
             <div className="rounded-lg bg-slate-50 px-3 py-2">
-              <dt className="text-[11px] text-slate-400">이탈 확률</dt>
+              <dt className="text-[11px] text-slate-400">이탈 가능성</dt>
               <dd className="mt-0.5 text-lg font-bold text-slate-900">
                 {row.probability_pct}%
               </dd>
             </div>
             <div className="rounded-lg bg-slate-50 px-3 py-2">
-              <dt className="text-[11px] text-slate-400">권장 채널</dt>
+              <dt className="text-[11px] text-slate-400">추천 연락 경로</dt>
               <dd className="mt-0.5 text-sm font-semibold text-slate-800">
                 {row.recommended_channel}
               </dd>
@@ -177,8 +178,8 @@ export default function DonorDetailDrawer({
           </dl>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Next Step
+            <h3 className="text-xs font-semibold tracking-wide text-slate-400">
+              다음 조치
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
               {row.next_step}

@@ -8,9 +8,9 @@
  */
 
 export const FEATURE_LINKS = [
-  { id: 'daeho', name: '대호', path: '/daeho', teaser: '기부자 관리 · 배치 스코어링' },
+  { id: 'daeho', name: '대호', path: '/daeho', teaser: '일괄 이탈 예측 · 기부자 관리' },
   { id: 'jeongseok', name: '정석', path: '/jeongseok', teaser: '담당 기능 구현 예정' },
   { id: 'hosun', name: '호순', path: '/hosun', teaser: '담당 기능 구현 예정' },
   { id: 'jinhwa', name: '진화', path: '/jinhwa', teaser: '담당 기능 구현 예정' },
-  { id: 'jiyun', name: '지윤', path: '/jiyun', teaser: '담당 기능 구현 예정' },
+  { id: 'jiyun', name: '지윤', path: '/jiyun', teaser: '로그인 · 마이페이지 · Firebase' },
 ]

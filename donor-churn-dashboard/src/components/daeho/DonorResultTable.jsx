@@ -2,6 +2,7 @@
  * DonorResultTable — 배치 예측 결과 리스트 (이탈확률 내림차순)
  */
 import Badge from '../common/Badge'
+import { riskLabel } from '../../utils/riskLabels'
 
 export default function DonorResultTable({
   rows,
@@ -11,17 +12,27 @@ export default function DonorResultTable({
 }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[900px] text-left text-sm">
+      <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
         <thead>
-          <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-            <th className="px-2 py-2 font-medium">#</th>
-            <th className="px-2 py-2 font-medium">이름</th>
-            <th className="px-2 py-2 font-medium">이탈확률</th>
-            <th className="px-2 py-2 font-medium">위험</th>
-            <th className="px-2 py-2 font-medium">권장 채널</th>
-            <th className="px-2 py-2 font-medium">이메일</th>
-            <th className="px-2 py-2 font-medium">전화번호</th>
-            <th className="px-2 py-2 font-medium">Next Step</th>
+          <tr className="border-b border-slate-100 text-xs tracking-wide text-slate-400">
+            <th className="whitespace-nowrap px-3 py-2.5 font-medium">번호</th>
+            <th className="whitespace-nowrap px-3 py-2.5 font-medium">이름</th>
+            <th className="whitespace-nowrap px-3 py-2.5 font-medium">
+              이탈 가능성
+            </th>
+            <th className="whitespace-nowrap px-3 py-2.5 font-medium">위험도</th>
+            <th className="whitespace-nowrap px-3 py-2.5 font-medium">
+              추천 연락 경로
+            </th>
+            <th className="whitespace-nowrap px-3 py-2.5 font-medium">
+              이메일
+            </th>
+            <th className="whitespace-nowrap px-3 py-2.5 font-medium">
+              전화번호
+            </th>
+            <th className="min-w-[280px] px-3 py-2.5 font-medium">
+              다음 조치
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -44,7 +55,7 @@ export default function DonorResultTable({
                   selected ? 'bg-teal-50/70' : ''
                 }`}
               >
-                <td className="px-2 py-2.5 text-slate-400">
+                <td className="whitespace-nowrap px-3 py-3 text-slate-400">
                   <span className="inline-flex items-center gap-1.5">
                     {r.row_index}
                     {resting ? (
@@ -52,13 +63,13 @@ export default function DonorResultTable({
                     ) : null}
                   </span>
                 </td>
-                <td className="px-2 py-2.5 font-medium text-slate-800">
+                <td className="whitespace-nowrap px-3 py-3 font-medium text-slate-800">
                   {r.name || '—'}
                 </td>
-                <td className="px-2 py-2.5 font-semibold text-slate-900">
+                <td className="whitespace-nowrap px-3 py-3 font-semibold tabular-nums text-slate-900">
                   {r.probability_pct}%
                 </td>
-                <td className="px-2 py-2.5">
+                <td className="whitespace-nowrap px-3 py-3">
                   <Badge
                     variant={
                       r.risk_level === 'High'
@@ -68,19 +79,19 @@ export default function DonorResultTable({
                           : 'success'
                     }
                   >
-                    {r.risk_level}
+                    {riskLabel(r.risk_level)}
                   </Badge>
                 </td>
-                <td className="px-2 py-2.5 text-slate-700">
+                <td className="whitespace-nowrap px-3 py-3 text-slate-700">
                   {r.recommended_channel}
                 </td>
-                <td className="px-2 py-2.5 text-slate-600">
+                <td className="whitespace-nowrap px-3 py-3 text-slate-600">
                   {r.email || '—'}
                 </td>
-                <td className="px-2 py-2.5 text-slate-600">
+                <td className="whitespace-nowrap px-3 py-3 tabular-nums text-slate-600">
                   {r.phone || '—'}
                 </td>
-                <td className="max-w-xs px-2 py-2.5 text-xs leading-relaxed text-slate-600">
+                <td className="min-w-[280px] max-w-md px-3 py-3 text-xs leading-relaxed break-keep text-slate-600">
                   {r.next_step}
                 </td>
               </tr>
@@ -90,7 +101,7 @@ export default function DonorResultTable({
       </table>
       {!rows.length ? (
         <p className="py-8 text-center text-sm text-slate-400">
-          표시할 행이 없습니다.
+          표시할 결과가 없습니다.
         </p>
       ) : null}
     </div>

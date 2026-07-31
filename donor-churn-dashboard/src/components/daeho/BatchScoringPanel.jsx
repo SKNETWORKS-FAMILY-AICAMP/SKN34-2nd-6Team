@@ -27,6 +27,19 @@ import DonorDetailDrawer from './DonorDetailDrawer'
 import RestSuggestModal from './RestSuggestModal'
 import RestConfirmModal from './RestConfirmModal'
 
+function ChannelTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null
+  const value = payload[0]?.value
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md">
+      <p className="font-semibold text-slate-800">{label}</p>
+      <p className="mt-1 text-slate-600">
+        고위험 인원 <span className="font-semibold text-teal-700">{value}명</span>
+      </p>
+    </div>
+  )
+}
+
 export default function BatchScoringPanel({
   mode = 'full',
   isAuthenticated = false,
@@ -189,7 +202,7 @@ export default function BatchScoringPanel({
       <header>
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
-            Donor Management
+            기부자 관리
           </p>
           {isPreview ? (
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
@@ -198,7 +211,7 @@ export default function BatchScoringPanel({
           ) : null}
         </div>
         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
-          기부자 관리 · 배치 스코어링
+          일괄 이탈 예측
         </h1>
       </header>
 
@@ -207,7 +220,7 @@ export default function BatchScoringPanel({
           <div>
             <h2 className="text-sm font-semibold text-slate-900">1. 파일 업로드</h2>
             <p className="mt-1 text-xs text-slate-500">
-              CSV / Excel · 한글 컬럼명·영문 alias·설문코드 모두 허용
+              CSV 또는 Excel 파일을 올리면 됩니다 (템플릿 형식 권장)
             </p>
           </div>
           {isPreview ? (
@@ -231,9 +244,8 @@ export default function BatchScoringPanel({
         </div>
 
         <p className="mt-4 max-w-2xl text-sm text-slate-500">
-          파일을 업로드하면 이탈 확률을 계산하고, 고위험군에게는{' '}
-          <strong className="font-semibold text-slate-700">기부정보 습득경로</strong>로
-          캠페인 발송을 권고합니다.
+          파일을 올리면 각 기부자의 이탈 가능성을 계산하고, 고위험 기부자에게는
+          어떤 경로로 연락하면 좋을지 함께 알려 줍니다.
         </p>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -265,7 +277,7 @@ export default function BatchScoringPanel({
             className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-700 disabled:opacity-70"
           >
             {!isPreview && loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            배치 예측 실행
+            이탈 예측 실행
           </button>
         </div>
         {error ? (
@@ -279,42 +291,58 @@ export default function BatchScoringPanel({
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-slate-900">2. 요약</h2>
               <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <Stat label="전체 행" value={batch.n_total} />
-                <Stat label="스코어링" value={batch.n_scored} />
+                <Stat label="전체 인원" value={batch.n_total} />
+                <Stat label="분석 완료" value={batch.n_scored} />
                 <Stat label="고위험" value={batch.n_high_risk} accent />
-                <Stat label="임계값" value={batch.threshold} />
+                <Stat
+                  label="고위험 기준"
+                  value={`${Math.round(Number(batch.threshold) * 100)}%`}
+                />
               </dl>
-              <p className="mt-3 text-xs text-slate-400">모델: {batch.model_name}</p>
+              <p className="mt-3 text-xs text-slate-400">
+                이탈 확률이 고위험 기준 이상이면 고위험으로 분류합니다
+              </p>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <Radio className="h-4 w-4 text-teal-600" />
-                고위험군 권장 발송 채널
+                고위험 기부자 · 추천 연락 경로
               </h2>
+              <p className="mb-3 text-xs text-slate-500">
+                고위험으로 분류된 기부자 수 (경로별)
+              </p>
               {batch.channel_distribution?.length ? (
                 <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={batch.channel_distribution}
+                      data={batch.channel_distribution.map((d) => ({
+                        channel: d.channel,
+                        인원: d.count,
+                      }))}
                       layout="vertical"
-                      margin={{ left: 8, right: 16 }}
+                      margin={{ left: 4, right: 16 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+                      <XAxis
+                        type="number"
+                        allowDecimals={false}
+                        tick={{ fontSize: 11 }}
+                        unit="명"
+                      />
                       <YAxis
                         type="category"
                         dataKey="channel"
-                        width={120}
+                        width={132}
                         tick={{ fontSize: 10 }}
                       />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#0d9488" radius={[0, 4, 4, 0]} />
+                      <Tooltip content={<ChannelTooltip />} />
+                      <Bar dataKey="인원" fill="#0d9488" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="text-sm text-slate-400">고위험 결과가 없습니다.</p>
+                <p className="text-sm text-slate-400">고위험 기부자가 없습니다.</p>
               )}
             </div>
           </section>
@@ -322,7 +350,7 @@ export default function BatchScoringPanel({
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-sm font-semibold text-slate-900">
-                3. 결과 (이탈확률 내림차순) · 행 클릭 시 상세
+                3. 결과 목록 · 행을 누르면 상세 확인
               </h2>
               <button
                 type="button"

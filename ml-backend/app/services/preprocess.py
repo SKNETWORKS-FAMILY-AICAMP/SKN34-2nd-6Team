@@ -139,9 +139,27 @@ def prepare_for_predict(df_raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
         pass
 
     X = to_model_matrix(renamed)
-    # v2 학습 컬럼에는 더 이상 주 정보 습득경로가 없으므로 권장 채널은 기본값을 사용한다.
-    channel_raw = pd.Series([7] * len(renamed), index=renamed.index)
+    channel_raw = primary_channel_series(renamed)
     return X, channel_raw
+
+
+def primary_channel_series(renamed: pd.DataFrame) -> pd.Series:
+    """문3_1~문3_12 multi-hot에서 첫 번째 활성 경로를 권장 채널로 사용 (없으면 7)."""
+    values: list[int] = []
+    for idx in renamed.index:
+        chosen = 7
+        for i in range(1, 13):
+            col = f"문3_{i}"
+            if col not in renamed.columns:
+                continue
+            try:
+                if float(renamed.at[idx, col]) == 1.0:
+                    chosen = i
+                    break
+            except (TypeError, ValueError):
+                continue
+        values.append(chosen)
+    return pd.Series(values, index=renamed.index, dtype=int)
 
 
 def _cell_str(value: object) -> str:
