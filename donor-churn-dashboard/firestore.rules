@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 카카오 로그인은 Firebase Auth를 거치지 않아 request.auth로 검증이 불가능합니다.
+    // 프로젝트 데모 목적으로만 문서 id와 uid 필드 일치 여부만 확인합니다 (실서비스 보안 수준 아님).
+    match /kakaoUsers/{kakaoId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.uid == kakaoId;
+      allow delete: if true;
+    }
+
+    // 추가한 부분
+    match /activities/{activityId} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
