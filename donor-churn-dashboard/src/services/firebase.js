@@ -11,7 +11,20 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-export const app = initializeApp(firebaseConfig)
-export const auth = getAuth(app)
-export const db = getFirestore(app)
-export const googleProvider = new GoogleAuthProvider()
+const hasConfig = Boolean(
+  firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId &&
+    firebaseConfig.appId,
+)
+
+export const app = hasConfig ? initializeApp(firebaseConfig) : null
+export const auth = app ? getAuth(app) : null
+export const db = app ? getFirestore(app) : null
+export const googleProvider = app ? new GoogleAuthProvider() : null
+
+if (!hasConfig && import.meta.env.DEV) {
+  console.warn(
+    '[Firebase] 루트 .env 에 VITE_FIREBASE_* 값이 없습니다. 로그인/회원가입이 동작하지 않습니다.',
+  )
+}

@@ -1,12 +1,15 @@
 /**
  * activityDb — 팀 공용 활동 기록(마이페이지용) Firestore 서비스
- *
- * 대상 경로: donor-churn-dashboard\src\services\activityDb.js (새 파일)
  */
 import { addDoc, collection, getDocs, orderBy, query, serverTimestamp, where } from 'firebase/firestore'
 import { db } from './firebase'
 
+function requireDb() {
+  if (!db) throw new Error('Firebase가 설정되지 않았습니다. 루트 .env의 VITE_FIREBASE_* 를 확인하세요.')
+}
+
 export async function logActivity(uid, { type, summary, meta = null }) {
+  requireDb()
   await addDoc(collection(db, 'activities'), {
     uid,
     type,
@@ -17,7 +20,12 @@ export async function logActivity(uid, { type, summary, meta = null }) {
 }
 
 export async function getUserActivities(uid) {
-  const q = query(collection(db, 'activities'), where('uid', '==', uid), orderBy('createdAt', 'desc'))
+  requireDb()
+  const q = query(
+    collection(db, 'activities'),
+    where('uid', '==', uid),
+    orderBy('createdAt', 'desc'),
+  )
   const snapshot = await getDocs(q)
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+  return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
 }
