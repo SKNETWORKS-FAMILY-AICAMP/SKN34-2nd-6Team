@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 
-$venvPy = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
+$venvPy = Join-Path $PSScriptRoot "subvenv\Scripts\python.exe"
 if (-not (Test-Path $venvPy)) {
     Write-Host ".venv not found. Run setup first:"
     Write-Host "  .\setup.ps1"
