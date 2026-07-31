@@ -190,6 +190,7 @@ PROFILE_USER_KEYS: list[str] = [
     "has_children",
     "household_size",
     "region_group",
+    "religion",
     "employment",
     "income",
     "education",

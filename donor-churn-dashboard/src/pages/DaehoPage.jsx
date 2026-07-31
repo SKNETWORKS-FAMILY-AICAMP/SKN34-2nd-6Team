@@ -3,12 +3,14 @@
  * TODO: 배포 전 로그인 가드 복구
  */
 // import { useEffect } from 'react'
-// import { useNavigate } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import BatchScoringPanel from '../components/daeho/BatchScoringPanel'
 // import { useAuth } from '../context/AuthContext'
 // import { requireLogin } from '../utils/requireLogin'
 
 export default function DaehoPage() {
+  const { batchResult, storeBatchResult } = useOutletContext()
+
   // --- 로그인 가드 (나중에 복구) ---
   // const { isAuthenticated } = useAuth()
   // const navigate = useNavigate()
@@ -25,5 +27,12 @@ export default function DaehoPage() {
   // --- /로그인 가드 ---
 
   // 개발 중: 로그인 없이 전체 기능 사용
-  return <BatchScoringPanel mode="full" isAuthenticated />
+  return (
+    <BatchScoringPanel
+      mode="full"
+      isAuthenticated
+      initialBatch={batchResult}
+      onBatchResult={storeBatchResult}
+    />
+  )
 }

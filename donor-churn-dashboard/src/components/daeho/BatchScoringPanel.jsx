@@ -29,6 +29,8 @@ export default function BatchScoringPanel({
   mode = 'full',
   isAuthenticated = false,
   onRequireLogin,
+  initialBatch = null,
+  onBatchResult,
 }) {
   const navigate = useNavigate()
   const isPreview = mode === 'preview'
@@ -36,7 +38,7 @@ export default function BatchScoringPanel({
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [batch, setBatch] = useState(null)
+  const [batch, setBatch] = useState(() => initialBatch)
   const [filterHigh, setFilterHigh] = useState(false)
   const [selected, setSelected] = useState(null)
   const [pausedIds, setPausedIds] = useState(() => new Set())
@@ -95,6 +97,7 @@ export default function BatchScoringPanel({
     try {
       const data = await predictBatch(file)
       setBatch(data)
+      onBatchResult?.(data, file.name)
       setSelected(null)
       setPausedIds(new Set())
       setActionLogs({})
@@ -283,18 +286,27 @@ export default function BatchScoringPanel({
               <h2 className="text-sm font-semibold text-slate-900">
                 3. 결과 (이탈확률 내림차순) · 행 클릭 시 상세
               </h2>
-              <button
-                type="button"
-                onClick={() => setFilterHigh((v) => !v)}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium ${
-                  filterHigh
-                    ? 'border-rose-200 bg-rose-50 text-rose-700'
-                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                <Filter className="h-3.5 w-3.5" />
-                {filterHigh ? '고위험만 표시 중' : '고위험만 보기'}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigate('/jinhwa')}
+                  className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700"
+                >
+                  예측 결과 시각화
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterHigh((v) => !v)}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium ${
+                    filterHigh
+                      ? 'border-rose-200 bg-rose-50 text-rose-700'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Filter className="h-3.5 w-3.5" />
+                  {filterHigh ? '고위험만 표시 중' : '고위험만 보기'}
+                </button>
+              </div>
             </div>
 
             <DonorResultTable

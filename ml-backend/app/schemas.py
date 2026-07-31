@@ -12,6 +12,13 @@ class ChannelCount(BaseModel):
     count: int
 
 
+class UploadInfo(BaseModel):
+    original_filename: str
+    stored_filename: str
+    storage_path: str
+    size_bytes: int
+
+
 class BatchResultRow(BaseModel):
     row_index: int
     probability: float
@@ -30,6 +37,7 @@ class BatchPredictResponse(BaseModel):
     n_total: int
     n_scored: int
     n_high_risk: int
+    upload: UploadInfo
     channel_distribution: list[ChannelCount] = Field(default_factory=list)
     results: list[BatchResultRow] = Field(default_factory=list)
 

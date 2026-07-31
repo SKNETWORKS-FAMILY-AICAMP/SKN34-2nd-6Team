@@ -16,7 +16,18 @@ async function request(path, options = {}) {
 
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(`API ${res.status}: ${text || res.statusText}`)
+    let body = null
+    try {
+      body = text ? JSON.parse(text) : null
+    } catch {
+      body = null
+    }
+    const detail = body?.detail
+      ? typeof body.detail === 'string'
+        ? body.detail
+        : JSON.stringify(body.detail)
+      : text || res.statusText
+    throw new Error(`API ${res.status}: ${detail}`)
   }
 
   return res.json()
