@@ -8,13 +8,21 @@ React(`../donor-churn-dashboard`) 배치 스코어링용 FastAPI.
 
 ## 실행
 
-```bash
-cd ml-backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+의존성·가상환경·환경변수는 **레포 루트**에서 통일합니다.
+
+```powershell
+# 레포 루트에서
+.\setup.ps1          # 최초 1회 (.venv + requirements.txt)
+.\run-backend.ps1    # http://127.0.0.1:8000
 ```
 
-프론트 `.env`: `VITE_API_BASE_URL=http://localhost:8000`
+macOS/Linux: `./setup.sh` → `./run-backend.sh`
+
+설정 파일:
+- `../requirements.txt` — Python 패키지
+- `../.env` / `../.env.example` — AWS·`VITE_API_BASE_URL` 등
+
+프론트: `cd ../donor-churn-dashboard && npm install && npm run dev`
 
 ## 엔드포인트
 
