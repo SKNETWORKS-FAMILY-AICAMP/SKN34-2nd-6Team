@@ -90,7 +90,7 @@ export default function HomePage() {
             </h2>
             <p className="text-sm text-slate-500 sm:text-base">
               {isAuthenticated
-                ? '전체 기능은 대호 페이지에서 사용할 수 있습니다.'
+                ? '전체 기능은 기부자 관리 페이지에서 사용할 수 있습니다.'
                 : '로그인 후 전체 기능을 사용할 수 있습니다.'}
             </p>
           </div>

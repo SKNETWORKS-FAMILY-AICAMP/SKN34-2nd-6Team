@@ -22,6 +22,8 @@ import {
 } from 'recharts'
 import { predictBatch, templateDownloadUrl } from '../../services/api'
 import { requireLogin } from '../../utils/requireLogin'
+import { useAuth } from '../../context/AuthContext'
+import { upsertDonorsFromBatch } from '../../services/donorRosterDb'
 import DonorResultTable from './DonorResultTable'
 import DonorDetailDrawer from './DonorDetailDrawer'
 import RestSuggestModal from './RestSuggestModal'
@@ -46,6 +48,8 @@ export default function BatchScoringPanel({
   onRequireLogin,
 }) {
   const navigate = useNavigate()
+  const { user, isAuthenticated: authOk } = useAuth()
+  const loggedIn = Boolean(isAuthenticated || authOk)
   const isPreview = mode === 'preview'
 
   const [file, setFile] = useState(null)
@@ -93,7 +97,7 @@ export default function BatchScoringPanel({
   }
 
   const guardAction = (e) => {
-    if (isPreview && !isAuthenticated) {
+    if (isPreview && !loggedIn) {
       e?.preventDefault()
       if (onRequireLogin) onRequireLogin()
       else requireLogin(navigate, '/')
@@ -121,6 +125,20 @@ export default function BatchScoringPanel({
       setActionLogs({})
       setSuggestOpen(false)
       setConfirmOpen(false)
+
+      if (user && user.provider !== 'kakao' && data?.results?.length) {
+        try {
+          const { saved, updated } = await upsertDonorsFromBatch(user, data.results)
+          showToast(
+            `마이페이지 명단에 반영했습니다. (새로 ${saved}명 · 갱신 ${updated}명)`,
+          )
+        } catch (saveErr) {
+          console.error(saveErr)
+          showToast(
+            '예측은 완료됐지만 명단 저장에 실패했습니다. Firestore 규칙을 확인해 주세요.',
+          )
+        }
+      }
     } catch (err) {
       const raw = String(err?.message || '')
       const isColumnError =
