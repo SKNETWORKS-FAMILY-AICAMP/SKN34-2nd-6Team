@@ -38,3 +38,21 @@ export async function predictBatch(file) {
 export function templateDownloadUrl() {
   return `${API_BASE}/api/v1/template/csv`
 }
+
+/**
+ * Bedrock 개인화 SMS/이메일 초안
+ * @param {{
+ *   donor_name?: string,
+ *   probability_pct: number,
+ *   risk_level: string,
+ *   recommended_channel: string,
+ *   next_step: string,
+ *   profile?: Record<string, unknown>,
+ * }} payload
+ */
+export async function generateCopyDraft(payload) {
+  return request('/api/v1/copy/draft', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}

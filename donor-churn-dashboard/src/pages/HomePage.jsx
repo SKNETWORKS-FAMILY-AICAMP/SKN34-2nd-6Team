@@ -89,12 +89,9 @@ export default function HomePage() {
               기부자 관리 미리보기
             </h2>
             <p className="text-sm text-slate-500 sm:text-base">
-              {/* TODO: 배포 전 로그인 문구 복구
               {isAuthenticated
-                ? '전체 기능은 대호 페이지에서 사용할 수 있습니다.'
+                ? '전체 기능은 기부자 관리 페이지에서 사용할 수 있습니다.'
                 : '로그인 후 전체 기능을 사용할 수 있습니다.'}
-              */}
-              전체 기능은 대호 페이지에서 사용할 수 있습니다.
             </p>
           </div>
           <BatchScoringPanel
@@ -102,18 +99,28 @@ export default function HomePage() {
             isAuthenticated={isAuthenticated}
             onRequireLogin={handleRequireLogin}
           />
-          {/* TODO: 배포 전 로그인 시에만 링크 표시로 복구
-          {isAuthenticated ? ( ... ) : null}
-          */}
-          <div className="mt-6">
-            <Link
-              to="/daeho"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:underline"
-            >
-              전체 기능으로 이동
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+          {isAuthenticated ? (
+            <div className="mt-6">
+              <Link
+                to="/daeho"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:underline"
+              >
+                전체 기능으로 이동
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          ) : (
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={handleRequireLogin}
+                className="inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:underline"
+              >
+                로그인하고 전체 기능 사용하기
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
