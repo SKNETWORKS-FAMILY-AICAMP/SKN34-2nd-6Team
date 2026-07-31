@@ -26,6 +26,7 @@ class BatchResultRow(BaseModel):
     risk_level: str
     recommended_channel: str
     next_step: str
+    name: str = ""
     email: str = ""
     phone: str = ""
     profile: dict[str, Any] = Field(default_factory=dict)
@@ -46,3 +47,20 @@ class HealthResponse(BaseModel):
     status: str
     model_loaded: bool
     detail: dict[str, Any] = Field(default_factory=dict)
+
+
+class CopyDraftRequest(BaseModel):
+    donor_name: str = ""
+    probability_pct: float
+    risk_level: str
+    recommended_channel: str
+    next_step: str
+    profile: dict[str, Any] = Field(default_factory=dict)
+
+
+class CopyDraftResponse(BaseModel):
+    sms: str
+    email_subject: str
+    email_body: str
+    rationale: str
+    model_id: str = ""

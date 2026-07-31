@@ -7,7 +7,13 @@ from pathlib import Path
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import Response
 
-from app.schemas import BatchPredictResponse, HealthResponse
+from app.schemas import (
+    BatchPredictResponse,
+    CopyDraftRequest,
+    CopyDraftResponse,
+    HealthResponse,
+)
+from app.services.bedrock_copy import generate_copy_draft
 from app.services.column_map import USER_LABELS
 from app.services.preprocess import ColumnMappingError, build_template_dataframe
 from app.services.predict import get_model, resolve_model_path, score_batch
@@ -74,6 +80,28 @@ async def predict_batch(file: UploadFile = File(...)) -> BatchPredictResponse:
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=500, detail=f"예측 중 오류: {exc}"
+        ) from exc
+
+
+@router.post("/api/v1/copy/draft", response_model=CopyDraftResponse)
+def create_copy_draft(body: CopyDraftRequest) -> CopyDraftResponse:
+    try:
+        draft = generate_copy_draft(
+            donor_name=body.donor_name,
+            probability_pct=body.probability_pct,
+            risk_level=body.risk_level,
+            recommended_channel=body.recommended_channel,
+            next_step=body.next_step,
+            profile=body.profile,
+        )
+        return CopyDraftResponse(**draft)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=500, detail=f"초안 생성 중 오류: {exc}"
         ) from exc
 
 

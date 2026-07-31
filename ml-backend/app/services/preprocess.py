@@ -139,12 +139,27 @@ def prepare_for_predict(df_raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
         pass
 
     X = to_model_matrix(renamed)
-    info_raw = (
-        renamed["문7"].copy()
-        if "문7" in renamed.columns
-        else pd.Series([7] * len(renamed), index=renamed.index)
-    )
-    return X, pd.to_numeric(info_raw, errors="coerce").fillna(7)
+    channel_raw = primary_channel_series(renamed)
+    return X, channel_raw
+
+
+def primary_channel_series(renamed: pd.DataFrame) -> pd.Series:
+    """문3_1~문3_12 multi-hot에서 첫 번째 활성 경로를 권장 채널로 사용 (없으면 7)."""
+    values: list[int] = []
+    for idx in renamed.index:
+        chosen = 7
+        for i in range(1, 13):
+            col = f"문3_{i}"
+            if col not in renamed.columns:
+                continue
+            try:
+                if float(renamed.at[idx, col]) == 1.0:
+                    chosen = i
+                    break
+            except (TypeError, ValueError):
+                continue
+        values.append(chosen)
+    return pd.Series(values, index=renamed.index, dtype=int)
 
 
 def _cell_str(value: object) -> str:
@@ -159,21 +174,25 @@ def _cell_str(value: object) -> str:
 
 
 def extract_contacts(df_raw: pd.DataFrame) -> list[dict[str, str]]:
-    """원본 DF에서 행별 email/phone 추출 (없으면 빈 문자열)."""
+    """원본 DF에서 행별 name/email/phone 추출 (없으면 빈 문자열)."""
+    name_col = None
     email_col = None
     phone_col = None
     for col in df_raw.columns:
         key = resolve_contact_key(col)
-        if key == "email" and email_col is None:
+        if key == "name" and name_col is None:
+            name_col = col
+        elif key == "email" and email_col is None:
             email_col = col
         elif key == "phone" and phone_col is None:
             phone_col = col
 
     rows: list[dict[str, str]] = []
     for i in range(len(df_raw)):
+        name = _cell_str(df_raw.iloc[i][name_col]) if name_col is not None else ""
         email = _cell_str(df_raw.iloc[i][email_col]) if email_col is not None else ""
         phone = _cell_str(df_raw.iloc[i][phone_col]) if phone_col is not None else ""
-        rows.append({"email": email, "phone": phone})
+        rows.append({"name": name, "email": email, "phone": phone})
     return rows
 
 
@@ -226,10 +245,10 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
         "income": 4_000_000,
         "income_change": 2,
         "education": 4,
-        "org_criteria": 2,
-        "info_channel": 7,
-        "donate_intent": 1,
+        "reason_for_donation": 1,
+        "volunteer_count": 2,
         "know_hometown_giving": 1,
+        "giving_culuter": 1,
     }
     # 문3 multi-hot: 주경로만 1
     for i in range(1, 13):
@@ -238,6 +257,7 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
     variants: list[dict] = [
         {
             **base,
+            "name": "김민수",
             "email": "donor1@example.com",
             "phone": "010-1234-5678",
         },
@@ -253,9 +273,11 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "employment": 5,
             "income": 2_500_000,
             "income_change": 1,
-            "info_channel": 9,
-            "donate_intent": 2,
+            "reason_for_donation": 2,
+            "volunteer_count": 0,
             "know_hometown_giving": 2,
+            "giving_culuter": 2,
+            "name": "이지은",
             "email": "donor2@example.com",
             "phone": "010-2345-6789",
             **{f"channel_{i}": (1 if i == 9 else 0) for i in range(1, 13)},
@@ -271,8 +293,10 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "income": 5_500_000,
             "income_change": 3,
             "education": 5,
-            "info_channel": 1,
-            "donate_intent": 1,
+            "reason_for_donation": 3,
+            "volunteer_count": 4,
+            "know_hometown_giving": 1,
+            "name": "박철수",
             "email": "donor3@example.com",
             "phone": "010-3456-7890",
             **{f"channel_{i}": (1 if i == 1 else 0) for i in range(1, 13)},
@@ -288,9 +312,11 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "religion": 2,
             "employment": 2,
             "income": 3_200_000,
-            "info_channel": 5,
-            "donate_intent": 2,
+            "reason_for_donation": 4,
+            "volunteer_count": 1,
             "know_hometown_giving": 1,
+            "giving_culuter": 1,
+            "name": "최유진",
             "email": "donor4@example.com",
             "phone": "010-4567-8901",
             **{f"channel_{i}": (1 if i == 5 else 0) for i in range(1, 13)},
@@ -307,9 +333,11 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "income": 6_800_000,
             "income_change": 2,
             "education": 6,
-            "info_channel": 6,
-            "donate_intent": 1,
+            "reason_for_donation": 5,
+            "volunteer_count": 7,
             "know_hometown_giving": 2,
+            "giving_culuter": 2,
+            "name": "정하늘",
             "email": "donor5@example.com",
             "phone": "010-5678-9012",
             **{f"channel_{i}": (1 if i == 6 else 0) for i in range(1, 13)},
@@ -322,4 +350,9 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
     contact_cols = list(CONTACT_LABELS.keys())
     df = df[feature_cols + contact_cols]
     rename = {**USER_LABELS, **CONTACT_LABELS}
-    return df.rename(columns=rename)
+    df = df.rename(columns=rename)
+    volunteer_label = USER_LABELS["volunteer_count"]
+    df[volunteer_label] = pd.to_numeric(
+        df[volunteer_label], errors="raise"
+    ).astype("int64")
+    return df
