@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 카카오 프로필 (기존 유지 — 이번 기부자 명단과 무관)
+    match /kakaoUsers/{kakaoId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.uid == kakaoId;
+      allow delete: if true;
+    }
+
+    match /activities/{activityId} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    // 기부자 명단 — Firebase Auth 로그인 사용자만
+    match /donorRosters/{ownerId}/donors/{donorId} {
+      allow read, write: if request.auth != null && request.auth.uid == ownerId;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
