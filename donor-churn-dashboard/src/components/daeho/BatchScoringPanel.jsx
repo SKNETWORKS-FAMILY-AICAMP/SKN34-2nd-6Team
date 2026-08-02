@@ -56,7 +56,7 @@ export default function BatchScoringPanel({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [batch, setBatch] = useState(null)
-  const [filterHigh, setFilterHigh] = useState(false)
+  const [sortByRisk, setSortByRisk] = useState(false)
   const [selected, setSelected] = useState(null)
   const [restingIds, setRestingIds] = useState(() => new Set())
   const [suggestedRestIds, setSuggestedRestIds] = useState(() => new Set())
@@ -69,9 +69,11 @@ export default function BatchScoringPanel({
   const rows = useMemo(() => {
     if (!batch?.results) return []
     const scored = batch.results.filter((r) => r.probability != null)
-    if (filterHigh) return scored.filter((r) => r.risk_level === 'High')
-    return scored
-  }, [batch, filterHigh])
+    if (!sortByRisk) return scored
+    return [...scored].sort(
+      (a, b) => Number(b.probability ?? 0) - Number(a.probability ?? 0),
+    )
+  }, [batch, sortByRisk])
 
   const showToast = (message) => {
     setToast(message)
@@ -372,15 +374,15 @@ export default function BatchScoringPanel({
               </h2>
               <button
                 type="button"
-                onClick={() => setFilterHigh((v) => !v)}
+                onClick={() => setSortByRisk((v) => !v)}
                 className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium ${
-                  filterHigh
+                  sortByRisk
                     ? 'border-rose-200 bg-rose-50 text-rose-700'
                     : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
                 <Filter className="h-3.5 w-3.5" />
-                {filterHigh ? '고위험만 표시 중' : '고위험만 보기'}
+                {sortByRisk ? '위험도 높은 순 적용 중' : '위험도 높은 순'}
               </button>
             </div>
 
