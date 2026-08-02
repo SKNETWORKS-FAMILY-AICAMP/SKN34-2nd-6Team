@@ -137,6 +137,8 @@ env.bak/
 venv.bak/
 basic_venv/
 **/basic_venv/
+subvenv/
+**/subvenv/
 
 # Frontend (Vite / npm)
 node_modules/

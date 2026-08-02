@@ -3,11 +3,14 @@
 이 문서는 **지금 레포가 어떻게 생겼는지**, **데이터가 어떻게 흘러 React에 보이는지**,  
 **각자 이름 페이지에서 무엇을 하면 되는지**를 가장 쉽게 정리한 것입니다.
 
+> 최종 갱신: 2026-08-02 (daeho 기준 · 정석 솔루션 UI 합류)
+
 ---
 
 ## 1. 한 줄로 이해하기
 
-> 사용자가 CSV를 올리면 → Python(FastAPI)이 학습된 XGBoost로 이탈 확률을 계산하고 → React가 리스트·차트로 보여준다.
+> 사용자가 CSV를 올리면 → Python(FastAPI)이 학습된 XGBoost로 이탈 확률을 계산하고 → React가 리스트·차트로 보여준다.  
+> 로그인 사용자면 예측 결과가 **Firestore 기부자 명단**에도 쌓여 마이페이지·후속 조치로 이어진다.
 
 ```
 [사용자 CSV/Excel]
@@ -15,8 +18,11 @@
         ▼
 [ml-backend] 컬럼 매핑 → 전처리 → 모델 예측 → JSON 결과
         │
-        ▼
-[donor-churn-dashboard] React가 fetch → 화면(테이블/차트/상세)
+        ├──────────────────────────────┐
+        ▼                              ▼
+[donor-churn-dashboard]          [Firestore]
+ React 표·차트·상세               donorRosters/{uid}/donors
+ (대호·정석 등)                    (마이페이지 명단)
 ```
 
 ---
@@ -26,20 +32,22 @@
 ```
 SKN34-2nd-6Team/
 ├── donor-churn-dashboard/   ← React 프론트 (화면)
-├── ml-backend/              ← FastAPI (예측 API)
+│   └── firestore.rules      ← Firestore Security Rules
+├── ml-backend/              ← FastAPI (예측·AI 초안 API)
 ├── ML/                      ← 학습된 모델 파일 (XGBoost_model_v2.joblib)
 ├── requirements.txt         ← Python 의존성 (루트 단일)
 ├── .env.example / .env      ← 환경변수 (루트 단일, Vite+백엔드 공유)
 ├── setup.ps1 / run-backend.ps1
 ├── src/util/                ← 원래 학습/전처리 스크립트 참고용
 ├── docs/                    ← 깃/커밋 가이드 등
+├── structure.md             ← 이 문서
 └── README.md                ← 팀원 이름
 ```
 
 | 폴더 | 역할 |
 |------|------|
-| `donor-churn-dashboard` | 사용자가 보는 웹 UI (Vite + React + Tailwind) |
-| `ml-backend` | CSV 받아서 예측하고 JSON으로 돌려주는 서버 |
+| `donor-churn-dashboard` | 사용자가 보는 웹 UI (Vite + React + Tailwind + Firebase) |
+| `ml-backend` | CSV 받아서 예측하고 JSON으로 돌려주는 서버 (+ Bedrock 초안) |
 | `ML/` | 이미 학습된 모델 (재학습 없이 로드만) |
 
 ### 로컬 실행 (루트에서)
@@ -50,7 +58,11 @@ SKN34-2nd-6Team/
 cd donor-churn-dashboard; npm install; npm run dev
 ```
 
+> Python 가상환경은 **루트 `.venv`만** 사용한다. `basic_venv` / `subvenv` 등 다른 이름은 쓰지 않는다.
+
 macOS/Linux: `./setup.sh` → `./run-backend.sh`
+
+`.env`에 `VITE_API_BASE_URL`, `VITE_FIREBASE_*`, (선택) `VITE_KAKAO_JS_KEY`, AWS Bedrock 키를 채운다. 예시는 `.env.example`.
 
 ---
 
@@ -58,35 +70,40 @@ macOS/Linux: `./setup.sh` → `./run-backend.sh`
 
 ```
 donor-churn-dashboard/src/
-├── App.jsx                 ← 라우트(/daeho, /hosun …) 정의
-├── pages/                  ← URL마다 1개 페이지
-│   ├── HomePage.jsx
-│   ├── DaehoPage.jsx       ← 대호 (구현 완료 예시)
-│   ├── JeongseokPage.jsx
-│   ├── HosunPage.jsx
-│   ├── JinhwaPage.jsx
-│   └── JiyunPage.jsx
+├── App.jsx                 ← 라우트 정의
+├── pages/
+│   ├── HomePage.jsx        ← 랜딩 (히어로 + 미리보기 + 기능 카드)
+│   ├── LoginPage.jsx / SignupPage.jsx
+│   ├── DaehoPage.jsx       ← 기부자 관리 · 배치 스코어링 ✅
+│   ├── JeongseokPage.jsx   ← 솔루션 도출 (3탭) ✅
+│   ├── HosunPage.jsx       ← 시각화 (스텁)
+│   ├── JinhwaPage.jsx      ← 모델 평가·히스토리 (스텁)
+│   └── JiyunPage.jsx       ← 마이페이지 · 기부자 명단 ✅
 ├── components/
-│   ├── layout/             ← 헤더, 공통 레이아웃
-│   ├── common/             ← Badge 등 공용 UI
-│   └── daeho/              ← 대호 기능 컴포넌트 (참고용)
-├── services/api.js         ← 백엔드 호출 (fetch)
-├── data/
-│   ├── featureLinks.js     ← 헤더/홈에 나오는 팀원 링크·티저
-│   └── inferenceFields.js  ← 템플릿 필드 설명(프론트 메타)
-├── context/AuthContext.jsx ← 로그인 상태
-└── utils/requireLogin.js   ← 로그인 유도
+│   ├── layout/AppLayout.jsx
+│   ├── common/Badge.jsx
+│   ├── daeho/              ← BatchScoringPanel, Drawer, 후속조치 등
+│   └── jeongseok/          ← SolutionPanel, ChurnDriverPanel, Demographic…
+├── services/
+│   ├── api.js              ← FastAPI (predictBatch, copy draft…)
+│   ├── firebase.js         ← Firebase 초기화
+│   ├── userDb.js / kakaoDb.js
+│   ├── donorRosterDb.js    ← 기부자 명단 upsert/list/delete
+│   └── activityDb.js       ← 활동 기록
+├── data/featureLinks.js    ← 헤더/홈 네비·티저
+├── context/AuthContext.jsx ← Firebase(+카카오) 로그인 상태
+└── utils/requireLogin.js, riskLabels.js, …
 ```
 
-### 페이지 ↔ URL ↔ 담당
+### 페이지 ↔ URL ↔ 담당 ↔ 상태
 
-| 이름 | URL | 페이지 파일 | 컴포넌트 폴더 |
-|------|-----|-------------|---------------|
-| 김대호 | `/daeho` | `pages/DaehoPage.jsx` | `components/daeho/` |
-| 채정석 | `/jeongseok` | `pages/JeongseokPage.jsx` | `components/jeongseok/` (만들면 됨) |
-| 황호순 | `/hosun` | `pages/HosunPage.jsx` | `components/hosun/` |
-| 김진화 | `/jinhwa` | `pages/JinhwaPage.jsx` | `components/jinhwa/` |
-| 홍지윤 | `/jiyun` | `pages/JiyunPage.jsx` | `components/jiyun/` |
+| 담당 | URL | 화면 이름 (`featureLinks`) | 상태 |
+|------|-----|---------------------------|------|
+| 김대호 | `/daeho` | 기부자 관리 | ✅ 배치 예측·리스트·상세·후속조치 |
+| 채정석 | `/jeongseok` | 솔루션 도출 | ✅ 위험도·핵심요인·인구통계 3탭 |
+| 황호순 | `/hosun` | 호순 | ⬜ 스텁 (시각화 예정) |
+| 김진화 | `/jinhwa` | 진화 | ⬜ 스텁 (평가·히스토리 예정) |
+| 홍지윤 | `/jiyun` | 마이페이지 | ✅ 프로필·명단·후속조치 |
 
 헤더/홈 카드 문구는 `data/featureLinks.js` 의 `name`, `teaser` 만 바꾸면 됩니다.
 
@@ -96,24 +113,30 @@ donor-churn-dashboard/src/
 
 ```
 ml-backend/app/
-├── main.py                 ← 앱 진입
-├── api/routes.py           ← API 엔드포인트
-├── schemas.py              ← 응답 JSON 모양
+├── main.py
+├── api/routes.py
+├── schemas.py
 └── services/
-    ├── column_map.py       ← 한글라벨 ↔ 설문코드 ↔ 모델피처 매핑
-    ├── preprocess.py       ← 업로드 읽기, 전처리, 템플릿 CSV 생성
-    └── predict.py          ← 모델 로드 + 배치 스코어링
+    ├── column_map.py
+    ├── preprocess.py
+    ├── predict.py
+    └── bedrock_copy.py     ← AI 문자/이메일 초안 (Bedrock)
 ```
 
 ### 주요 API
 
 | Method | Path | 하는 일 |
 |--------|------|---------|
-| GET | `/api/v1/template/csv` | 예시 5행 템플릿 다운로드 (이메일·전화번호 포함) |
-| POST | `/api/v1/predict/batch` | CSV/Excel 업로드 → 이탈 확률 등 JSON |
-| GET | `/health` | 서버·모델 살아있는지 확인 |
+| GET | `/health` | 서버·모델 상태 |
+| GET | `/api/v1/template/csv` | 예시 템플릿 다운로드 |
+| POST | `/api/v1/predict/batch` | CSV/Excel → 이탈 확률 JSON |
+| POST | `/api/v1/copy/draft` | 기부자 정보 → AI 초안 |
+| GET | `/api/v1/fields` | 라벨↔설문 코드 (디버그) |
 
-프론트·백엔드 공통: 레포 루트 `.env` 의 `VITE_API_BASE_URL=http://localhost:8000`
+> 정석 탭「핵심 요인」은 원래 `GET /api/v1/insights/churn-drivers`를 기대하지만 **아직 백엔드에 없음**.  
+> 프론트는 API 실패 시 `churnDriverData.js` 정적 폴백으로 화면이 깨지지 않게 처리함.
+
+프론트·백엔드 공통: 루트 `.env` 의 `VITE_API_BASE_URL=http://localhost:8000`
 
 ---
 
@@ -122,104 +145,64 @@ ml-backend/app/
 ### 쓰는 데이터 / 모델
 
 1. **입력:** 사용자가 올린 CSV/Excel  
-   - 피처 컬럼: 연령, 성별, 소득, 기부정보 습득경로 등 (한글 라벨 OK)  
-   - 연락처(모델에 안 넣음): `이메일`, `전화번호` → 화면 후속 조치용으로만 전달
-2. **모델:** `ML/XGBoost_model_v2.joblib`  
-   - 전처리 후 **27개 피처**로 이탈 확률(0~1) 예측
+   - 피처: 연령, 성별, 소득, 기부정보 습득경로 등 (한글 라벨 OK)  
+   - 연락처(모델 미사용): `이메일`, `전화번호` → 화면 후속 조치용
+2. **모델:** `ML/XGBoost_model_v2.joblib` → 전처리 후 **27개 피처**로 이탈 확률(0~1)
 
-### 변환 파이프라인 (쉽게)
+### 변환 파이프라인
 
 ```
 ① 업로드 파일 읽기 (CSV/Excel)
         ↓
-② 컬럼 이름 맞추기
-   "연령" / "age" / "H선문2_01"  →  설문 코드로 통일
-   (매핑 표: column_map.py)
+② 컬럼 이름 맞추기 (column_map.py)
         ↓
-③ 학습 때와 같은 전처리
-   (소득 로그 변환, 채널 multi-hot 등)
+③ 학습과 같은 전처리
         ↓
-④ 모델 predict_proba → 이탈 확률
+④ model.predict_proba → 이탈 확률
         ↓
-⑤ 결과 JSON 만들기
-   - probability / risk_level / recommended_channel / next_step
-   - email, phone, profile (상세용)
-   - 확률 높은 순 정렬
+⑤ JSON: probability / risk_level / recommended_channel / next_step / email·phone·profile
         ↓
-⑥ React가 JSON을 받아 표·차트·상세 Drawer로 표시
+⑥ React 표시 + (로그인 시) Firestore 명단 upsert
 ```
 
-### React에서 보이는 것 (대호 페이지 기준)
+### React에서 보이는 것 (대호 `/daeho`)
 
 | 단계 | 화면 |
 |------|------|
-| 1 | 템플릿 다운로드 / 파일 선택 / 배치 예측 실행 |
+| 1 | 템플릿 다운로드 / 파일 선택 / 배치 예측 |
 | 2 | 요약 숫자 + 고위험군 권장 채널 차트 |
-| 3 | 결과 리스트 (이탈확률 높은 순) |
-| 4 | 행 클릭 → 오른쪽 상세 + AI 문자·이메일 초안/쉬어가기 제안·요청 반영(시뮬레이션) |
+| 3 | 결과 리스트 (**위험도 높은 순** 토글) |
+| 4 | 행 클릭 → 상세 Drawer + AI 초안·쉬어가기 |
 
-호출 코드: `services/api.js` → `predictBatch(file)`  
-UI: `components/daeho/BatchScoringPanel.jsx`
+호출: `services/api.js` → `predictBatch(file)`  
+UI: `components/daeho/BatchScoringPanel.jsx`  
+명단 저장: `upsertDonorsFromBatch` (`donorRosterDb.js`) → 마이페이지에서 `listDonors`
 
-### 5-1. joblib 모델은 어떻게 쓰이나? (쉽게)
+### 5-1. joblib
 
-> `ML/XGBoost_model_v2.joblib` 은 **엑셀/CSV 데이터가 아니라**,  
-> 미리 학습해 둔 **XGBoost 이탈 예측 모델**을 파일로 저장한 것이다.  
-> 앱에서는 **다시 학습하지 않고**, 불러와서 **점수만 매긴다**.
+- 서버가 로드만 하고, 프론트는 joblib을 직접 쓰지 않음
+- 위치: `ML/XGBoost_model_v2.joblib`
 
-#### 비유로 이해하기
+### 5-2. 사용자용 컬럼 vs 모델용 컬럼
 
-| 비유 | 실제 |
+| 계층 | 예시 |
 |------|------|
-| 요리 레시피 책 | joblib 모델 파일 |
-| 오늘 들어온 재료 | 사용자가 올린 CSV |
-| 요리사가 레시피대로 요리 | FastAPI가 전처리 후 `predict_proba` 실행 |
-| 완성된 요리(점수) | 이탈 확률 → React 화면에 표시 |
+| 사용자용 템플릿 | `연령`, `성별`, … |
+| 학습·모델용 | `H선문2_01`, `배문6_정리` 등 27피처 |
 
-#### 흐름 (한눈에)
+업로드 시 `rename_to_survey()`가 이름을 맞춘다.  
+관련: `column_map.py`, `preprocess.py`, `inferenceFields.js`
 
-```
-1. 서버가 joblib 파일을 메모리에 로드 (처음 한 번)
-2. 사용자가 CSV 업로드
-3. 컬럼 이름·전처리를 학습 때와 똑같이 맞춤 (27개 피처)
-4. 모델이 각 행마다 이탈 확률(0~1) 계산
-5. 확률로 High / Medium / Low 나누고 JSON으로 반환
-6. React(대호 페이지)가 표·차트로 보여줌
-```
+### 5-3. Firestore (로그인 사용자)
 
-#### 코드에서 하는 일
+| 경로 | 용도 |
+|------|------|
+| `users/{uid}` | 프로필 |
+| `kakaoUsers/{id}` | 카카오 프로필 |
+| `activities/{id}` | 활동 기록 |
+| `donorRosters/{uid}/donors/{id}` | 기부자 명단 (예측 결과 upsert) |
 
-- **로드:** `ml-backend/app/services/predict.py` → `joblib.load(...)`
-- **예측:** `model.predict_proba(X)[:, 1]` → 이탈 확률
-- **API:** `POST /api/v1/predict/batch`
-- **화면:** `services/api.js` → `BatchScoringPanel.jsx`
-
-#### 알아두면 좋은 점
-
-- joblib **안을 열어 데이터를 조회·수정하지 않는다.**
-- 프론트(React)는 joblib을 직접 쓰지 않고, **백엔드 API 결과만** 받는다.
-- 모델 파일 위치: 주로 `ML/XGBoost_model_v2.joblib`
-
-### 5-2. 사용자용 컬럼 vs 모델용 컬럼 
-
-> **전략 A:** 사람에게 보이는 이름과 학습/모델용 이름을 나눠 두고,  
-> 업로드 시 백엔드가 자동으로 바꿔 준다. 별도 변환 스크립트를 새로 만들 필요 없음.
-
-| 계층 | 예시 | 누가 보나 |
-|------|------|-----------|
-| 사용자용 (템플릿 헤더) | `연령`, `성별`, `월평균 가구소득...` | 사람 / CSV 다운로드 |
-| 내부 키 | `age`, `gender`, `income` | 코드 매핑용 |
-| 학습·모델용 | `H선문2_01`, `배문1`, `배문6` → `배문6_정리` 등 | 모델 27피처 |
-
-**동작 요약**
-
-1. 템플릿(`GET /api/v1/template/csv`) → **한글 라벨**로 내려줌  
-2. 사용자가 CSV를 채워서 업로드  
-3. `rename_to_survey()`가 `"연령"` / `"age"` / `"H선문2_01"` 등을 **설문 코드로 통일**  
-4. 학습과 같은 전처리 후 모델 예측
-
-**관련 파일:** `ml-backend/app/services/column_map.py`, `preprocess.py`  
-**프론트 라벨 참고:** `donor-churn-dashboard/src/data/inferenceFields.js`
+규칙은 `donor-churn-dashboard/firestore.rules` — Console에 배포 필요.
 
 ---
 
@@ -227,179 +210,111 @@ UI: `components/daeho/BatchScoringPanel.jsx`
 
 터미널 2개:
 
-```bash
-# 1) API
-cd ml-backend
-uvicorn app.main:app --reload --port 8000
+```powershell
+# 1) API (루트)
+.\run-backend.ps1
 
 # 2) 프론트
 cd donor-churn-dashboard
 npm run dev
 ```
 
-브라우저에서 홈 → 각자 이름 카드 또는 `/daeho` 등으로 이동.
+브라우저에서 홈(`/`) → 기능 카드 또는 `/daeho`, `/jeongseok`, `/jiyun` 등.
 
-> 참고: 대호 페이지 로그인 가드는 **개발용으로 잠시 꺼져 있음**. 배포 전에 다시 켜면 됩니다.
+> **로그인 가드:** `/daeho`, `/jiyun` 등은 비로그인 시 로그인 유도.  
+> 홈 히어로「회원가입」버튼은 **로그인 상태면 숨김**.
 
 ---
 
-## 7. 각자 페이지에서 구현하는 방법 (간단)
+## 7. 각자 페이지에서 구현하는 방법
 
-대호(`/daeho`)가 **완성 예시**입니다. 같은 패턴으로 자기 폴더만 채우면 됩니다.
+다른 사람 폴더는 되도록 건드리지 말고, **자기 `pages/*` + `components/{이름}/` + 필요 시 API** 만 수정.
 
 ### 공통 체크리스트
 
-1. **페이지 파일 열기**  
-   예: `pages/HosunPage.jsx` — 지금은 “구현하세요” 스텁만 있음.
-2. **컴포넌트 폴더 만들기**  
-   예: `src/components/hosun/MyFeature.jsx`
-3. **페이지에서 컴포넌트만 렌더**  
-   ```jsx
-   import MyFeature from '../components/hosun/MyFeature'
-   export default function HosunPage() {
-     return <MyFeature />
-   }
-   ```
-4. **API가 필요하면**  
-   - 이미 있는 예측 API 재사용 → `services/api.js`에 함수 추가  
-   - 새 API가 필요하면 → `ml-backend/app/api/routes.py` + `services/` 에 추가
-5. **홈/헤더 문구**  
-   `data/featureLinks.js` 에서 자기 `teaser`를 실제 기능명으로 변경
-6. **스타일**  
-   기존처럼 Tailwind + teal/slate 톤 유지하면 전체 느낌이 맞음
+1. `pages/XxxPage.jsx` 열기 (스텁이면 컴포넌트 연결)
+2. `src/components/{이름}/` 에 UI 추가
+3. API 필요 시 `services/api.js` 또는 `ml-backend` 에 추가
+4. `featureLinks.js` 의 `name` / `teaser` 갱신
+5. Tailwind + teal/slate 톤 유지
 
-### 대호를 참고할 때 볼 파일
+### 대호 참고 파일
 
-| 하고 싶은 것 | 참고 파일 |
-|--------------|-----------|
-| 페이지 연결 | `pages/DaehoPage.jsx` |
-| 업로드·예측·리스트 | `components/daeho/BatchScoringPanel.jsx` |
+| 하고 싶은 것 | 참고 |
+|--------------|------|
+| 업로드·예측·리스트 | `BatchScoringPanel.jsx` |
 | 결과 테이블 | `DonorResultTable.jsx` |
-| 오른쪽 상세 | `DonorDetailDrawer.jsx` |
-| API 호출 | `services/api.js` |
-| 컬럼/템플릿 의미 | `ml-backend/.../column_map.py`, `preprocess.py` |
+| 상세·후속조치 | `DonorDetailDrawer.jsx`, `FollowUpActions.jsx` |
+| API | `services/api.js` |
+| 명단 저장 | `donorRosterDb.js` |
 
-### 팀원별 시작점
+### 팀원별 현황
 
-| 담당 | URL | 시작 파일 | 할 일 요약 |
-|------|-----|-----------|------------|
-| **대호** | `/daeho` | `components/daeho/` | 기부자 관리·배치 스코어링 (이미 구현됨, 유지·개선) |
-| **지윤** | `/jiyun` | `pages/JiyunPage.jsx` → `components/jiyun/` | 로그인 + Firebase DB |
-| **호순** | `/hosun` | `pages/HosunPage.jsx` → `components/hosun/` | 이탈/비이탈·연령별 시각화 |
-| **진화** | `/jinhwa` | `pages/JinhwaPage.jsx` → `components/jinhwa/` | 모델 평가·히스토리 |
-| **정석** | `/jeongseok` | `pages/JeongseokPage.jsx` → `components/jeongseok/` | 솔루션 도출 |
-
-다른 사람 페이지/컴포넌트는 되도록 건드리지 말고, **자기 `pages/*` + `components/{이름}/` + 필요 시 API** 만 수정하는 것을 권장합니다.
-
-### 팀원별 할 일 (상세)
-
-#### 지윤 — 로그인 + Firebase 데이터베이스
-
-**목적**  
-mock 로그인을 Firebase Authentication으로 교체하고, Firestore 등으로 사용자·앱 데이터를 관리한다.
-
-**할 일**
-- Firebase 연동(초기화, `.env`)
-- 회원가입·로그인·로그아웃 (Auth)
-- `AuthContext` mock → Firebase 세션 교체, 로그인 가드 연결
-- Firestore 스키마 설계 (`users` 등) 및 프로필 CRUD
-- Security Rules로 본인 데이터만 접근 가능하게
-- `/login`, `/signup`, `/jiyun` UI 정리
-
-**완료 기준**
-- [ ] Auth로 가입/로그인/로그아웃 동작
-- [ ] 새로고침 후에도 로그인 유지
-- [ ] 비로그인 시 보호 기능 차단
-- [ ] DB에 사용자 문서 생성·조회, CRUD 동작
-- [ ] Security Rules 적용, 시크릿 미커밋
-
-**참고**  
-`context/AuthContext.jsx`, `pages/LoginPage.jsx`, `SignupPage.jsx`, `utils/requireLogin.js`, `pages/JiyunPage.jsx`, `AppLayout.jsx`
+| 담당 | URL | 상태 | 요약 |
+|------|-----|------|------|
+| **대호** | `/daeho` | ✅ | 배치 스코어링·기부자 관리·Firestore 명단 연동 |
+| **지윤** | `/jiyun` | ✅ | Firebase Auth·마이페이지·명단·후속조치 |
+| **정석** | `/jeongseok` | ✅ | 솔루션 3탭 (위험도 / 핵심요인 / 인구통계) |
+| **호순** | `/hosun` | ⬜ | 이탈·연령별 시각화 (배치/명단 데이터 재사용 권장) |
+| **진화** | `/jinhwa` | ⬜ | 모델 평가·히스토리 |
 
 ---
 
-#### 호순 — 이탈/비이탈·연령별 시각화
+### 팀원별 상세
 
-**목적**  
-이탈/비이탈 비율, 나이대별 이탈률 등 핵심 지표를 차트로 보여주는 시각화 페이지를 만든다.
+#### 대호 — 기부자 관리 · 배치 스코어링 ✅
 
-**할 일**
-- `/hosun` + `components/hosun/` 구현
-- 이탈 vs 비이탈 비율 차트
-- 연령대별 이탈률 차트
-- (가능하면) 위험도·권장 채널 분포
-- 데이터 소스 정하기 (배치 결과 재사용 / 샘플 / API)
-- 로딩·빈 데이터·에러 처리, `featureLinks.js` teaser 갱신
+- 홈 미리보기(`mode="preview"`) + `/daeho` 전체 모드
+- 예측 후 Firebase 사용자면 명단 upsert
+- 결과 목록 **위험도 높은 순** 정렬 토글
 
-**완료 기준**
-- [ ] 이탈/비이탈 차트 표시
-- [ ] 나이대별 이탈률 차트 표시
-- [ ] 빈 데이터 안내 UI
-- [ ] 홈/헤더 teaser 반영
+#### 지윤 — 로그인 + 마이페이지 ✅
 
-**참고**  
-`pages/HosunPage.jsx`, `services/api.js`, `components/daeho/BatchScoringPanel.jsx`, `ml-backend/.../schemas.py`
+- Firebase Auth / (선택) 카카오
+- 프로필 CRUD, 기부자 명단, Drawer·쉬어가기 등 대호와 동일 UX 일부 공유
+- 명단도 **위험도 높은 순** 정렬 토글
 
----
+#### 정석 — 솔루션 도출 ✅
 
-#### 진화 — 모델 평가 / 히스토리
+| 탭 | 컴포넌트 | 데이터 |
+|----|----------|--------|
+| 위험도별 솔루션 | `SolutionPanel` + `SolutionSegmentCard` | `predictBatch` 재사용 |
+| 핵심 요인 솔루션 | `ChurnDriverPanel` | API 없으면 `churnDriverData.js` 폴백 |
+| 인구통계별 솔루션 | `DemographicSolutionPanel` | `demographicChurnData.js` 정적 |
 
-**목적**  
-모델 성능 지표와 과거 예측·평가 이력을 조회하는 히스토리 페이지를 만든다.
+**남은 개선(선택):** 백엔드에 `GET /api/v1/insights/churn-drivers` 추가하면 탭2가 실시간 분석으로 전환됨.
 
-**할 일**
-- `/jinhwa` + `components/jinhwa/` 구현
-- 모델 메타(모델명, 버전, threshold) 표시
-- 평가 지표(Accuracy, Precision, Recall, F1, AUC 등 — 팀 합의) 표시
-- 과거 배치/평가 이력 리스트·상세
-- 이력 저장 방식(Firebase / 백엔드 / 로컬) 정하고 연동
-- `featureLinks.js` teaser 갱신
+#### 호순 — 이탈/비이탈·연령별 시각화 ⬜
 
-**완료 기준**
-- [ ] 평가 지표 확인 가능
-- [ ] 히스토리 목록·상세 동작
-- [ ] 새 실행 후 이력 반영 흐름 정의·동작
-- [ ] 홈/헤더 teaser 반영
+**목적:** 이탈 vs 비이탈, 나이대별 이탈률 등 차트.
 
-**참고**  
-`pages/JinhwaPage.jsx`, `ml-backend/app/api/routes.py`, `services/predict.py`, `schemas.py`, `ML/`
+**권장 데이터 소스**
+1. Firestore 명단 (`listDonors`) — 업로드 결과 재사용
+2. 또는 배치 JSON / 정적 샘플
 
----
+완료 기준: 차트 2종+, 빈 데이터 UI, `featureLinks` teaser 반영.
 
-#### 정석 — 솔루션 도출
+#### 진화 — 모델 평가 / 히스토리 ⬜
 
-**목적**  
-이탈 위험 기부자에 대한 재참여·리텐션 액션(채널, 메시지, 다음 단계)을 제시하는 솔루션 페이지를 만든다.
+**목적:** 모델 메타·지표(Accuracy 등)·과거 배치/평가 이력.
 
-**할 일**
-- `/jeongseok` + `components/jeongseok/` 구현
-- 위험도·특성별 추천 솔루션 규칙 정의
-- 권장 채널·후속 조치·메시지 가이드 UI
-- 대호 예측 결과(`risk_level`, `recommended_channel`, `next_step`)와 연결
-- (가능하면) 세그먼트별 솔루션 카드/필터
-- `FollowUpActions` 참고, `featureLinks.js` teaser 갱신
-
-**완료 기준**
-- [ ] 위험군별 솔루션 표시
-- [ ] 추천 채널·다음 단계가 데이터와 매핑
-- [ ] 운영자가 바로 적용 가능한 UI
-- [ ] 솔루션 규칙 문서화, teaser 반영
-
-**참고**  
-`pages/JeongseokPage.jsx`, `components/daeho/FollowUpActions.jsx`, `DonorDetailDrawer.jsx`, `ml-backend/.../schemas.py`, `predict.py`
+이력 저장 방식(Firebase / 백엔드 / 로컬)은 팀 합의 후 연동.
 
 ---
 
 ## 8. 한 장 요약 다이어그램
 
 ```
-   홈(/) ──┬── /daeho     → 배치 스코어링 (완료 예시)
-           ├── /jiyun     → 로그인 · Firebase DB
-           ├── /hosun     → 이탈 시각화
-           ├── /jinhwa    → 모델 평가 · 히스토리
-           └── /jeongseok → 솔루션 도출
+   홈(/) ──┬── /daeho      → 기부자 관리 · 배치 스코어링 ✅
+           ├── /jeongseok  → 솔루션 도출 (3탭) ✅
+           ├── /jiyun      → 마이페이지 · 명단 ✅
+           ├── /hosun      → 이탈 시각화 ⬜
+           └── /jinhwa     → 모델 평가 · 히스토리 ⬜
 
-   CSV ──► ml-backend(전처리+XGBoost) ──► JSON ──► React 화면
+   CSV ──► ml-backend(전처리+XGBoost) ──► JSON ──► React
+                                              │
+                                              └──► Firestore 명단 (로그인 시)
 ```
 
-질문 생기면 먼저 **대호 플로우**를 따라가 보면, 데이터→변환→화면 연결이 가장 빨리 보입니다.
+질문 생기면 먼저 **대호 플로우**(`/daeho` → `BatchScoringPanel` → `predictBatch`)를 따라가면  
+데이터 → 변환 → 화면 → 명단 연결이 가장 빨리 보입니다.
