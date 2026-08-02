@@ -56,12 +56,14 @@ export default function HomePage() {
                   기능 살펴보기
                   <ArrowDown className="h-4 w-4" />
                 </a>
-                <Link
-                  to="/signup"
-                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
-                >
-                  회원가입
-                </Link>
+                {!isAuthenticated ? (
+                  <Link
+                    to="/signup"
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
+                  >
+                    회원가입
+                  </Link>
+                ) : null}
               </div>
             </div>
           </div>
