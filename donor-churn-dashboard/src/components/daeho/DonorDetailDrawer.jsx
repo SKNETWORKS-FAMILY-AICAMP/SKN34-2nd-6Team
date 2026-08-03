@@ -1,21 +1,31 @@
 /**
  * DonorDetailDrawer — 오른쪽 슬라이드 상세 정보
  */
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import Badge from '../common/Badge'
 import FollowUpActions from './FollowUpActions'
+import { riskLabel } from '../../utils/riskLabels'
+import { generateCopyDraft } from '../../services/api'
 
 export default function DonorDetailDrawer({
   open,
   row,
-  paused,
+  resting,
+  suggested,
   actionLogs,
   onClose,
-  onSms,
-  onEmail,
-  onTogglePause,
+  onSendSms,
+  onSendEmail,
+  onSuggestRest,
+  onConfirmRest,
+  onResume,
 }) {
+  const [draftChannel, setDraftChannel] = useState(null)
+  const [draft, setDraft] = useState(null)
+  const [draftLoading, setDraftLoading] = useState(false)
+  const [draftError, setDraftError] = useState('')
+
   useEffect(() => {
     if (!open) return undefined
     const onKey = (e) => {
@@ -29,6 +39,66 @@ export default function DonorDetailDrawer({
       document.body.style.overflow = prev
     }
   }, [open, onClose])
+
+  useEffect(() => {
+    setDraftChannel(null)
+    setDraft(null)
+    setDraftLoading(false)
+    setDraftError('')
+  }, [row?.row_index])
+
+  useEffect(() => {
+    if (resting) {
+      setDraftChannel(null)
+      setDraft(null)
+      setDraftLoading(false)
+      setDraftError('')
+    }
+  }, [resting])
+
+  const fetchDraft = async (channel) => {
+    if (!row || resting) return
+    setDraftChannel(channel)
+    setDraft(null)
+    setDraftLoading(true)
+    setDraftError('')
+    try {
+      const result = await generateCopyDraft({
+        donor_name: row.name || '',
+        probability_pct: row.probability_pct,
+        risk_level: row.risk_level,
+        recommended_channel: row.recommended_channel,
+        next_step: row.next_step,
+        profile: row.profile || {},
+      })
+      setDraft(result)
+    } catch (err) {
+      setDraftError(
+        String(err?.message || '').includes('503')
+          ? 'AI 초안 서버(Bedrock)에 연결하지 못했습니다. AWS 설정·API 상태를 확인해 주세요.'
+          : 'AI 초안 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+      )
+    } finally {
+      setDraftLoading(false)
+    }
+  }
+
+  const handleCloseDraft = () => {
+    setDraftChannel(null)
+    setDraft(null)
+    setDraftError('')
+    setDraftLoading(false)
+  }
+
+  const handleSendDraft = () => {
+    if (!draftChannel || !draft) return
+    if (draftChannel === 'sms') {
+      onSendSms?.(draft)
+    } else {
+      onSendEmail?.(draft)
+    }
+    handleCloseDraft()
+  }
 
   if (!open || !row) return null
 
@@ -55,12 +125,15 @@ export default function DonorDetailDrawer({
 
         <header className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
-              Donor Detail
+            <p className="text-xs font-semibold tracking-wide text-teal-700">
+              기부자 상세
             </p>
             <h2 className="mt-1 text-lg font-bold text-slate-900">
-              행 #{row.row_index}
+              {row.name?.trim() ? row.name : `번호 ${row.row_index}`}
             </h2>
+            {row.name?.trim() ? (
+              <p className="text-xs text-slate-400">번호 {row.row_index}</p>
+            ) : null}
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <Badge
                 variant={
@@ -71,9 +144,11 @@ export default function DonorDetailDrawer({
                       : 'success'
                 }
               >
-                {row.risk_level}
+                {riskLabel(row.risk_level)}
               </Badge>
-              {paused ? <Badge variant="warning">일시정지</Badge> : null}
+              {resting ? (
+                <Badge variant="warning">잠시 쉬어가는 중</Badge>
+              ) : null}
             </div>
           </div>
           <button
@@ -89,13 +164,13 @@ export default function DonorDetailDrawer({
         <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
           <dl className="grid grid-cols-2 gap-3">
             <div className="rounded-lg bg-slate-50 px-3 py-2">
-              <dt className="text-[11px] text-slate-400">이탈 확률</dt>
+              <dt className="text-[11px] text-slate-400">이탈 가능성</dt>
               <dd className="mt-0.5 text-lg font-bold text-slate-900">
                 {row.probability_pct}%
               </dd>
             </div>
             <div className="rounded-lg bg-slate-50 px-3 py-2">
-              <dt className="text-[11px] text-slate-400">권장 채널</dt>
+              <dt className="text-[11px] text-slate-400">추천 연락 경로</dt>
               <dd className="mt-0.5 text-sm font-semibold text-slate-800">
                 {row.recommended_channel}
               </dd>
@@ -103,8 +178,8 @@ export default function DonorDetailDrawer({
           </dl>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Next Step
+            <h3 className="text-xs font-semibold tracking-wide text-slate-400">
+              다음 조치
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
               {row.next_step}
@@ -116,6 +191,12 @@ export default function DonorDetailDrawer({
               연락처
             </h3>
             <dl className="mt-2 space-y-2 text-sm">
+              <div className="flex justify-between gap-3 border-b border-slate-50 pb-2">
+                <dt className="text-slate-400">이름</dt>
+                <dd className="font-medium text-slate-800">
+                  {row.name || '—'}
+                </dd>
+              </div>
               <div className="flex justify-between gap-3 border-b border-slate-50 pb-2">
                 <dt className="text-slate-400">이메일</dt>
                 <dd className="font-medium text-slate-800">
@@ -157,10 +238,21 @@ export default function DonorDetailDrawer({
           <FollowUpActions
             email={row.email}
             phone={row.phone}
-            paused={paused}
-            onSms={onSms}
-            onEmail={onEmail}
-            onTogglePause={onTogglePause}
+            resting={resting}
+            suggested={suggested}
+            draftChannel={draftChannel}
+            draft={draft}
+            draftLoading={draftLoading}
+            draftError={draftError}
+            onCreateSmsDraft={() => fetchDraft('sms')}
+            onCreateEmailDraft={() => fetchDraft('email')}
+            onDraftChange={setDraft}
+            onSendDraft={handleSendDraft}
+            onCloseDraft={handleCloseDraft}
+            onRegenerateDraft={() => draftChannel && fetchDraft(draftChannel)}
+            onSuggestRest={onSuggestRest}
+            onConfirmRest={onConfirmRest}
+            onResume={onResume}
           />
 
           {actionLogs?.length ? (

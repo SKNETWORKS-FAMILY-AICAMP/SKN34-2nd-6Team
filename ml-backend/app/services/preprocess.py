@@ -139,9 +139,27 @@ def prepare_for_predict(df_raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
         pass
 
     X = to_model_matrix(renamed)
-    # v2 학습 컬럼에는 더 이상 주 정보 습득경로가 없으므로 권장 채널은 기본값을 사용한다.
-    channel_raw = pd.Series([7] * len(renamed), index=renamed.index)
+    channel_raw = primary_channel_series(renamed)
     return X, channel_raw
+
+
+def primary_channel_series(renamed: pd.DataFrame) -> pd.Series:
+    """문3_1~문3_12 multi-hot에서 첫 번째 활성 경로를 권장 채널로 사용 (없으면 7)."""
+    values: list[int] = []
+    for idx in renamed.index:
+        chosen = 7
+        for i in range(1, 13):
+            col = f"문3_{i}"
+            if col not in renamed.columns:
+                continue
+            try:
+                if float(renamed.at[idx, col]) == 1.0:
+                    chosen = i
+                    break
+            except (TypeError, ValueError):
+                continue
+        values.append(chosen)
+    return pd.Series(values, index=renamed.index, dtype=int)
 
 
 def _cell_str(value: object) -> str:
@@ -156,21 +174,25 @@ def _cell_str(value: object) -> str:
 
 
 def extract_contacts(df_raw: pd.DataFrame) -> list[dict[str, str]]:
-    """원본 DF에서 행별 email/phone 추출 (없으면 빈 문자열)."""
+    """원본 DF에서 행별 name/email/phone 추출 (없으면 빈 문자열)."""
+    name_col = None
     email_col = None
     phone_col = None
     for col in df_raw.columns:
         key = resolve_contact_key(col)
-        if key == "email" and email_col is None:
+        if key == "name" and name_col is None:
+            name_col = col
+        elif key == "email" and email_col is None:
             email_col = col
         elif key == "phone" and phone_col is None:
             phone_col = col
 
     rows: list[dict[str, str]] = []
     for i in range(len(df_raw)):
+        name = _cell_str(df_raw.iloc[i][name_col]) if name_col is not None else ""
         email = _cell_str(df_raw.iloc[i][email_col]) if email_col is not None else ""
         phone = _cell_str(df_raw.iloc[i][phone_col]) if phone_col is not None else ""
-        rows.append({"email": email, "phone": phone})
+        rows.append({"name": name, "email": email, "phone": phone})
     return rows
 
 
@@ -235,6 +257,7 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
     variants: list[dict] = [
         {
             **base,
+            "name": "김민수",
             "email": "donor1@example.com",
             "phone": "010-1234-5678",
         },
@@ -254,6 +277,7 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "volunteer_count": 0,
             "know_hometown_giving": 2,
             "giving_culuter": 2,
+            "name": "이지은",
             "email": "donor2@example.com",
             "phone": "010-2345-6789",
             **{f"channel_{i}": (1 if i == 9 else 0) for i in range(1, 13)},
@@ -272,6 +296,7 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "reason_for_donation": 3,
             "volunteer_count": 4,
             "know_hometown_giving": 1,
+            "name": "박철수",
             "email": "donor3@example.com",
             "phone": "010-3456-7890",
             **{f"channel_{i}": (1 if i == 1 else 0) for i in range(1, 13)},
@@ -291,6 +316,7 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "volunteer_count": 1,
             "know_hometown_giving": 1,
             "giving_culuter": 1,
+            "name": "최유진",
             "email": "donor4@example.com",
             "phone": "010-4567-8901",
             **{f"channel_{i}": (1 if i == 5 else 0) for i in range(1, 13)},
@@ -311,6 +337,7 @@ def build_template_dataframe(n_examples: int = 5) -> pd.DataFrame:
             "volunteer_count": 7,
             "know_hometown_giving": 2,
             "giving_culuter": 2,
+            "name": "정하늘",
             "email": "donor5@example.com",
             "phone": "010-5678-9012",
             **{f"channel_{i}": (1 if i == 6 else 0) for i in range(1, 13)},

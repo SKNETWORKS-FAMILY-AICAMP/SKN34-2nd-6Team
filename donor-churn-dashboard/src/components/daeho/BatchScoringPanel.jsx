@@ -22,8 +22,25 @@ import {
 } from 'recharts'
 import { predictBatch, templateDownloadUrl } from '../../services/api'
 import { requireLogin } from '../../utils/requireLogin'
+import { useAuth } from '../../context/AuthContext'
+import { upsertDonorsFromBatch } from '../../services/donorRosterDb'
 import DonorResultTable from './DonorResultTable'
 import DonorDetailDrawer from './DonorDetailDrawer'
+import RestSuggestModal from './RestSuggestModal'
+import RestConfirmModal from './RestConfirmModal'
+
+function ChannelTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null
+  const value = payload[0]?.value
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md">
+      <p className="font-semibold text-slate-800">{label}</p>
+      <p className="mt-1 text-slate-600">
+        고위험 인원 <span className="font-semibold text-teal-700">{value}명</span>
+      </p>
+    </div>
+  )
+}
 
 export default function BatchScoringPanel({
   mode = 'full',
@@ -31,6 +48,8 @@ export default function BatchScoringPanel({
   onRequireLogin,
 }) {
   const navigate = useNavigate()
+  const { user, isAuthenticated: authOk } = useAuth()
+  const loggedIn = Boolean(isAuthenticated || authOk)
   const isPreview = mode === 'preview'
 
   const [file, setFile] = useState(null)
@@ -39,9 +58,13 @@ export default function BatchScoringPanel({
   const [batch, setBatch] = useState(null)
   const [filterHigh, setFilterHigh] = useState(false)
   const [selected, setSelected] = useState(null)
-  const [pausedIds, setPausedIds] = useState(() => new Set())
+  const [restingIds, setRestingIds] = useState(() => new Set())
+  const [suggestedRestIds, setSuggestedRestIds] = useState(() => new Set())
+  const [restMeta, setRestMeta] = useState({})
   const [actionLogs, setActionLogs] = useState({})
   const [toast, setToast] = useState(null)
+  const [suggestOpen, setSuggestOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const rows = useMemo(() => {
     if (!batch?.results) return []
@@ -74,7 +97,7 @@ export default function BatchScoringPanel({
   }
 
   const guardAction = (e) => {
-    if (isPreview && !isAuthenticated) {
+    if (isPreview && !loggedIn) {
       e?.preventDefault()
       if (onRequireLogin) onRequireLogin()
       else requireLogin(navigate, '/')
@@ -96,8 +119,26 @@ export default function BatchScoringPanel({
       const data = await predictBatch(file)
       setBatch(data)
       setSelected(null)
-      setPausedIds(new Set())
+      setRestingIds(new Set())
+      setSuggestedRestIds(new Set())
+      setRestMeta({})
       setActionLogs({})
+      setSuggestOpen(false)
+      setConfirmOpen(false)
+
+      if (user && user.provider !== 'kakao' && data?.results?.length) {
+        try {
+          const { saved, updated } = await upsertDonorsFromBatch(user, data.results)
+          showToast(
+            `마이페이지 명단에 반영했습니다. (새로 ${saved}명 · 갱신 ${updated}명)`,
+          )
+        } catch (saveErr) {
+          console.error(saveErr)
+          showToast(
+            '예측은 완료됐지만 명단 저장에 실패했습니다. Firestore 규칙을 확인해 주세요.',
+          )
+        }
+      }
     } catch (err) {
       const raw = String(err?.message || '')
       const isColumnError =
@@ -113,34 +154,65 @@ export default function BatchScoringPanel({
     }
   }
 
-  const handleSms = () => {
+  const handleSendSms = () => {
     if (!selected?.phone) return
     showToast(`${selected.phone}로 문자 발송 요청을 접수했습니다.`)
-    pushLog(selected.row_index, '문자 전송')
+    pushLog(selected.row_index, 'AI 문자 발송')
   }
 
-  const handleEmail = () => {
+  const handleSendEmail = () => {
     if (!selected?.email) return
     showToast(`${selected.email}로 이메일 발송 요청을 접수했습니다.`)
-    pushLog(selected.row_index, '이메일 전송')
+    pushLog(selected.row_index, 'AI 이메일 발송')
   }
 
-  const handleTogglePause = () => {
+  const handleSuggestRest = ({ channel, months }) => {
     if (!selected) return
     const id = selected.row_index
-    setPausedIds((prev) => {
+    setSuggestedRestIds((prev) => new Set(prev).add(id))
+    setRestMeta((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        suggestedAt: Date.now(),
+        suggestedChannel: channel,
+        suggestedMonths: months,
+      },
+    }))
+    showToast('쉬어가기 제안을 발송했습니다.')
+    pushLog(id, `쉬어가기 제안 (${channel}, ${months}개월)`)
+    setSuggestOpen(false)
+  }
+
+  const handleConfirmRest = ({ confirmedVia, months, note }) => {
+    if (!selected) return
+    const id = selected.row_index
+    setRestingIds((prev) => new Set(prev).add(id))
+    setRestMeta((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        months,
+        confirmedVia,
+        note,
+      },
+    }))
+    showToast('잠시 쉬어가기로 반영했습니다.')
+    pushLog(id, `쉬어가기 요청 반영 (${confirmedVia}, ${months}개월)`)
+    setConfirmOpen(false)
+  }
+
+  const handleResume = () => {
+    if (!selected) return
+    if (!window.confirm('후원을 다시 시작할까요?')) return
+    const id = selected.row_index
+    setRestingIds((prev) => {
       const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-        showToast(`행 #${id} 일시정지를 해제했습니다.`)
-        pushLog(id, '일시정지 해제')
-      } else {
-        next.add(id)
-        showToast(`행 #${id}을(를) 일시정지했습니다.`)
-        pushLog(id, '일시정지')
-      }
+      next.delete(id)
       return next
     })
+    showToast('다시 시작했습니다.')
+    pushLog(id, '다시 시작')
   }
 
   return (
@@ -148,7 +220,7 @@ export default function BatchScoringPanel({
       <header>
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
-            Donor Management
+            기부자 관리
           </p>
           {isPreview ? (
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
@@ -157,7 +229,7 @@ export default function BatchScoringPanel({
           ) : null}
         </div>
         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
-          기부자 관리 · 배치 스코어링
+          일괄 이탈 예측
         </h1>
       </header>
 
@@ -166,7 +238,7 @@ export default function BatchScoringPanel({
           <div>
             <h2 className="text-sm font-semibold text-slate-900">1. 파일 업로드</h2>
             <p className="mt-1 text-xs text-slate-500">
-              CSV / Excel · 한글 컬럼명·영문 alias·설문코드 모두 허용
+              CSV 또는 Excel 파일을 올리면 됩니다 (템플릿 형식 권장)
             </p>
           </div>
           {isPreview ? (
@@ -190,12 +262,11 @@ export default function BatchScoringPanel({
         </div>
 
         <p className="mt-4 max-w-2xl text-sm text-slate-500">
-          파일을 업로드하면 이탈 확률을 계산하고, 고위험군에게는{' '}
-          <strong className="font-semibold text-slate-700">기부정보 습득경로</strong>로
-          캠페인 발송을 권고합니다.
+          파일을 올리면 각 기부자의 이탈 가능성을 계산하고, 고위험 기부자에게는
+          어떤 경로로 연락하면 좋을지 함께 알려 줍니다.
         </p>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           {isPreview ? (
             <button
               type="button"
@@ -224,7 +295,7 @@ export default function BatchScoringPanel({
             className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-700 disabled:opacity-70"
           >
             {!isPreview && loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            배치 예측 실행
+            이탈 예측 실행
           </button>
         </div>
         {error ? (
@@ -238,42 +309,58 @@ export default function BatchScoringPanel({
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-slate-900">2. 요약</h2>
               <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <Stat label="전체 행" value={batch.n_total} />
-                <Stat label="스코어링" value={batch.n_scored} />
+                <Stat label="전체 인원" value={batch.n_total} />
+                <Stat label="분석 완료" value={batch.n_scored} />
                 <Stat label="고위험" value={batch.n_high_risk} accent />
-                <Stat label="임계값" value={batch.threshold} />
+                <Stat
+                  label="고위험 기준"
+                  value={`${Math.round(Number(batch.threshold) * 100)}%`}
+                />
               </dl>
-              <p className="mt-3 text-xs text-slate-400">모델: {batch.model_name}</p>
+              <p className="mt-3 text-xs text-slate-400">
+                이탈 확률이 고위험 기준 이상이면 고위험으로 분류합니다
+              </p>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <Radio className="h-4 w-4 text-teal-600" />
-                고위험군 권장 발송 채널
+                고위험 기부자 · 추천 연락 경로
               </h2>
+              <p className="mb-3 text-xs text-slate-500">
+                고위험으로 분류된 기부자 수 (경로별)
+              </p>
               {batch.channel_distribution?.length ? (
                 <div className="h-56">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={batch.channel_distribution}
+                      data={batch.channel_distribution.map((d) => ({
+                        channel: d.channel,
+                        인원: d.count,
+                      }))}
                       layout="vertical"
-                      margin={{ left: 8, right: 16 }}
+                      margin={{ left: 4, right: 16 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+                      <XAxis
+                        type="number"
+                        allowDecimals={false}
+                        tick={{ fontSize: 11 }}
+                        unit="명"
+                      />
                       <YAxis
                         type="category"
                         dataKey="channel"
-                        width={120}
+                        width={132}
                         tick={{ fontSize: 10 }}
                       />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#0d9488" radius={[0, 4, 4, 0]} />
+                      <Tooltip content={<ChannelTooltip />} />
+                      <Bar dataKey="인원" fill="#0d9488" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="text-sm text-slate-400">고위험 결과가 없습니다.</p>
+                <p className="text-sm text-slate-400">고위험 기부자가 없습니다.</p>
               )}
             </div>
           </section>
@@ -281,7 +368,7 @@ export default function BatchScoringPanel({
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-sm font-semibold text-slate-900">
-                3. 결과 (이탈확률 내림차순) · 행 클릭 시 상세
+                3. 결과 목록 · 행을 누르면 상세 확인
               </h2>
               <button
                 type="button"
@@ -299,7 +386,7 @@ export default function BatchScoringPanel({
 
             <DonorResultTable
               rows={rows}
-              pausedIds={pausedIds}
+              restingIds={restingIds}
               selectedRowIndex={selected?.row_index}
               onSelect={setSelected}
             />
@@ -310,12 +397,34 @@ export default function BatchScoringPanel({
       <DonorDetailDrawer
         open={Boolean(selected)}
         row={selected}
-        paused={selected ? pausedIds.has(selected.row_index) : false}
+        resting={selected ? restingIds.has(selected.row_index) : false}
+        suggested={selected ? suggestedRestIds.has(selected.row_index) : false}
         actionLogs={selected ? actionLogs[selected.row_index] || [] : []}
-        onClose={() => setSelected(null)}
-        onSms={handleSms}
-        onEmail={handleEmail}
-        onTogglePause={handleTogglePause}
+        onClose={() => {
+          setSelected(null)
+          setSuggestOpen(false)
+          setConfirmOpen(false)
+        }}
+        onSendSms={handleSendSms}
+        onSendEmail={handleSendEmail}
+        onSuggestRest={() => setSuggestOpen(true)}
+        onConfirmRest={() => setConfirmOpen(true)}
+        onResume={handleResume}
+      />
+
+      <RestSuggestModal
+        open={suggestOpen && Boolean(selected)}
+        donorName={selected?.name}
+        email={selected?.email}
+        phone={selected?.phone}
+        onClose={() => setSuggestOpen(false)}
+        onSubmit={handleSuggestRest}
+      />
+
+      <RestConfirmModal
+        open={confirmOpen && Boolean(selected)}
+        onClose={() => setConfirmOpen(false)}
+        onSubmit={handleConfirmRest}
       />
 
       {toast ? (
