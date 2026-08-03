@@ -1,17 +1,33 @@
-/**
- * HosunPage — 호순 담당 페이지 (스텁)
- * 컴포넌트는 `src/components/hosun/` 에 추가하세요.
- */
-import { Link } from 'react-router-dom'
+import ModelEvaluationExplorer from '../components/hosun/ModelEvaluationExplorer'
 
 export default function HosunPage() {
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-slate-900">호순의 페이지</h1>
-      <p className="text-slate-500">여기에 기능을 구현하세요.</p>
-      <Link to="/" className="inline-block text-sm font-medium text-teal-700 hover:underline">
-        ← 홈으로
-      </Link>
+    <div className="space-y-8">
+      <header className="max-w-3xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">
+          Model History
+        </p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+          모델 히스토리
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-slate-500">
+          다섯 가지 분류 모델을 비교하고, 이탈자를 놓치지 않는
+          재현율과 F1 점수를 중심으로 최종 모델을 선정한 과정을 소개합니다.
+        </p>
+      </header>
+
+      <ModelEvaluationExplorer />
+
+      <footer className="rounded-xl border border-slate-200 bg-white px-5 py-4 text-xs leading-5 text-slate-500">
+        <p>
+          <span className="font-semibold text-slate-700">학습 데이터 출처:</span>{' '}
+          아름다운 재단 기부문화 연구소 (기빙코리아 2024, GK2022 개인기부자)
+        </p>
+        <p className="mt-2">
+        표시된 수치는 실행 당시 테스트셋의 반올림된 결과이며, 운영 데이터에서 동일한 성능을
+        보장하지 않습니다.
+        </p>
+      </footer>
     </div>
   )
 }

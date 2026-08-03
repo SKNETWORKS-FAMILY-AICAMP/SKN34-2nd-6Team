@@ -3,7 +3,7 @@
  */
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Sprout, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { MY_PAGE_LINK, NAV_LINKS } from '../../data/featureLinks'
 import { useAuth } from '../../context/AuthContext'
 
@@ -25,8 +25,8 @@ export default function AppLayout() {
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
           <Link to="/" className="flex shrink-0 items-center gap-2 text-slate-900">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-white">
-              <Sprout className="h-4 w-4" />
+            <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-teal-600 text-white shadow-[3px_3px_7px_rgba(15,23,42,0.18)]">
+              <img src="/logo_white.png" alt="doeep 로고" className="h-12 w-12 object-contain" />
             </span>
             <span className="flex flex-col leading-none">
               <span className="text-sm font-bold tracking-tight">doeep</span>
