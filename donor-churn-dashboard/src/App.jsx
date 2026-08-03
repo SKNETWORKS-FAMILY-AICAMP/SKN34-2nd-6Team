@@ -10,7 +10,6 @@ import SignupPage from './pages/SignupPage'
 import DaehoPage from './pages/DaehoPage'
 import JeongseokPage from './pages/JeongseokPage'
 import HosunPage from './pages/HosunPage'
-import JinhwaPage from './pages/JinhwaPage'
 import JiyunPage from './pages/JiyunPage'
 
 export default function App() {
@@ -25,7 +24,6 @@ export default function App() {
             <Route path="/daeho" element={<DaehoPage />} />
             <Route path="/jeongseok" element={<JeongseokPage />} />
             <Route path="/hosun" element={<HosunPage />} />
-            <Route path="/jinhwa" element={<JinhwaPage />} />
             <Route path="/jiyun" element={<JiyunPage />} />
           </Route>
         </Routes>

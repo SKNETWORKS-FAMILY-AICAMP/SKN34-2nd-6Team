@@ -3,13 +3,15 @@
  * mode: preview(메인 미리보기) | full(대호 페이지 실제 기능)
  */
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Upload,
   Download,
   Loader2,
   Filter,
   Radio,
+  BarChart3,
+  ArrowRight,
 } from 'lucide-react'
 import {
   BarChart,
@@ -24,6 +26,7 @@ import { predictBatch, templateDownloadUrl } from '../../services/api'
 import { requireLogin } from '../../utils/requireLogin'
 import { useAuth } from '../../context/AuthContext'
 import { upsertDonorsFromBatch } from '../../services/donorRosterDb'
+import { loadLatestBatch, saveLatestBatch } from '../../services/latestBatchStore'
 import DonorResultTable from './DonorResultTable'
 import DonorDetailDrawer from './DonorDetailDrawer'
 import RestSuggestModal from './RestSuggestModal'
@@ -55,7 +58,7 @@ export default function BatchScoringPanel({
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [batch, setBatch] = useState(null)
+  const [batch, setBatch] = useState(() => (isPreview ? null : loadLatestBatch()?.batch ?? null))
   const [sortByRisk, setSortByRisk] = useState(false)
   const [selected, setSelected] = useState(null)
   const [restingIds, setRestingIds] = useState(() => new Set())
@@ -99,11 +102,14 @@ export default function BatchScoringPanel({
   }
 
   const guardAction = (e) => {
-    if (isPreview && !loggedIn) {
-      e?.preventDefault()
+    if (!isPreview) return
+    e?.preventDefault()
+    if (!loggedIn) {
       if (onRequireLogin) onRequireLogin()
       else requireLogin(navigate, '/')
+      return
     }
+    navigate('/daeho')
   }
 
   const handleUpload = async () => {
@@ -120,6 +126,7 @@ export default function BatchScoringPanel({
     try {
       const data = await predictBatch(file)
       setBatch(data)
+      saveLatestBatch(data)
       setSelected(null)
       setRestingIds(new Set())
       setSuggestedRestIds(new Set())
@@ -307,6 +314,20 @@ export default function BatchScoringPanel({
 
       {!isPreview && batch ? (
         <>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3">
+            <p className="text-xs font-medium text-teal-800">
+              예측이 완료되었습니다. 인구통계별 이탈 통계와 맞춤 솔루션을 확인해 보세요.
+            </p>
+            <Link
+              to="/jeongseok"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-teal-700"
+            >
+              <BarChart3 className="h-3.5 w-3.5" />
+              통계 및 솔루션 보기
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
           <section className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-slate-900">2. 요약</h2>

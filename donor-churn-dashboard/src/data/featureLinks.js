@@ -9,9 +9,8 @@
 
 export const FEATURE_LINKS = [
   { id: 'daeho', name: '기부자 관리', path: '/daeho', teaser: '일괄 이탈 예측 · 기부자 관리' },
-  { id: 'jeongseok', name: '솔루션 도출', path: '/jeongseok', teaser: '위험도·요인·인구통계 솔루션' },
-  { id: 'hosun', name: '호순', path: '/hosun', teaser: '담당 기능 구현 예정' },
-  { id: 'jinhwa', name: '진화', path: '/jinhwa', teaser: '담당 기능 구현 예정' },
+  { id: 'jeongseok', name: '통계 및 솔루션', path: '/jeongseok', teaser: '이탈 통계 분석 · 인구통계별 맞춤 솔루션' },
+  { id: 'hosun', name: '모델 히스토리', path: '/hosun', teaser: '모델 선별 과정에 대해 설명합니다' },
   { id: 'jiyun', name: '마이페이지', path: '/jiyun', teaser: '프로필 · 활동 기록' },
 ]
 
