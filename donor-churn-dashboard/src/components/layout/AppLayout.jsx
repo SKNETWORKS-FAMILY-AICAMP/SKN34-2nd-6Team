@@ -23,20 +23,23 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
-          <Link to="/" className="flex shrink-0 items-center gap-2 text-slate-900">
-            <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-teal-600 text-white shadow-[3px_3px_7px_rgba(15,23,42,0.18)]">
-              <img src="/logo_white.png" alt="doeep 로고" className="h-12 w-12 object-contain" />
+        <div className="relative mx-auto flex h-14 max-w-6xl items-center px-4 sm:px-6">
+          <Link to="/" className="z-10 flex shrink-0 items-center gap-2.5">
+            <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06)] sm:h-12 sm:w-12">
+              <img
+                src="/doeep-mark.png"
+                alt="doeep"
+                className="h-8 w-8 object-contain sm:h-9 sm:w-9"
+              />
             </span>
-            <span className="flex flex-col leading-none">
-              <span className="text-sm font-bold tracking-tight">doeep</span>
-              <span className="text-[10px] text-slate-400">Let&apos;s doeep</span>
+            <span className="font-brand text-lg font-semibold tracking-tight text-[#076625] sm:text-xl">
+              doeep
             </span>
           </Link>
 
-          {/* Desktop feature nav — 마이페이지 제외 */}
+          {/* Desktop feature nav — 헤더 정중앙 */}
           <nav
-            className="hidden flex-1 items-center justify-center gap-6 md:flex lg:gap-10"
+            className="absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-6 md:flex lg:gap-10"
             aria-label="기능 바로가기"
           >
             {NAV_LINKS.map((item) => (
@@ -56,7 +59,7 @@ export default function AppLayout() {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-1.5 text-sm sm:gap-2">
+          <div className="z-10 ml-auto flex items-center gap-1.5 text-sm sm:gap-2">
             {isAuthenticated ? (
               <>
                 <span className="hidden max-w-[8rem] truncate text-slate-700 sm:inline">

@@ -3,9 +3,9 @@
  */
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowDown, ArrowRight } from 'lucide-react'
-import { FEATURE_LINKS } from '../data/featureLinks'
 import BatchScoringPanel from '../components/daeho/BatchScoringPanel'
 import JeongseokPreviewPanel from '../components/jeongseok/JeongseokPreviewPanel'
+import FeatureVisualCards from '../components/home/FeatureVisualCards'
 import { useAuth } from '../context/AuthContext'
 import { requireLogin } from '../utils/requireLogin'
 
@@ -26,7 +26,6 @@ export default function HomePage() {
               <p className="text-sm font-semibold tracking-[0.14em] text-teal-700 uppercase">
                 DOEEP · 두잎
               </p>
-              <p className="mt-1 text-xs tracking-wide text-slate-400">Let's doeep</p>
               <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
                 기부 이탈을 예측하고,
                 <br className="hidden sm:block" /> 기부 문화 참여를 이어갑니다
@@ -177,37 +176,12 @@ export default function HomePage() {
               우리가 하는 일
             </h2>
             <p className="text-sm leading-relaxed text-slate-500 sm:text-base">
-              문제 인식에서 예측·예방, 사유·동기·분야 탐색, 참여 유도까지 —
-              각 영역으로 이동해 기능을 이어 붙입니다. (표시명은 추후 실제
-              기능명으로 교체 예정)
+              예측에서 통계·솔루션, 모델 히스토리까지 — 각 영역으로 이동해 기부
+              여정을 이어 붙입니다.
             </p>
           </div>
 
-          <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURE_LINKS.map((item, index) => (
-              <li
-                key={item.id}
-                className={index === FEATURE_LINKS.length - 1 ? 'sm:col-span-2 lg:col-span-1' : ''}
-              >
-                <Link
-                  to={item.path}
-                  className="group flex h-full flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/50 px-5 py-5 transition hover:-translate-y-0.5 hover:border-teal-300 hover:bg-teal-50/40 hover:shadow-sm"
-                >
-                  <div>
-                    <p className="text-xs font-medium tracking-wide text-teal-700">
-                      {String(index + 1).padStart(2, '0')}
-                    </p>
-                    <p className="mt-2 text-lg font-semibold text-slate-900">{item.name}</p>
-                    <p className="mt-1 text-sm text-slate-500">{item.teaser}</p>
-                  </div>
-                  <span className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-teal-700 transition group-hover:gap-2">
-                    이동
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <FeatureVisualCards />
         </div>
       </section>
 
