@@ -52,6 +52,7 @@ export default function DemographicChartPanel({
   onSelect,
   data = DEMOGRAPHIC_CHURN,
   isLive = false,
+  showPdfButton = true,
 }) {
   const [activeId, setActiveId] = useState(data[0].id)
   const [hoverIndex, setHoverIndex] = useState(null)
@@ -83,7 +84,7 @@ export default function DemographicChartPanel({
             </button>
           ))}
         </nav>
-        <FullReportPdfButton data={data} />
+        {showPdfButton ? <FullReportPdfButton data={data} /> : null}
       </div>
 
       <section

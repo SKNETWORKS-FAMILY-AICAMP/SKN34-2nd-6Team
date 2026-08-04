@@ -1,23 +1,39 @@
 @import "tailwindcss";
 
 /*
-  디자인 토큰
-  - 중립 팔레트(slate) + 포인트 컬러 1개(teal)
-  - 향후 다크모드 확장 시 CSS 변수만 교체하면 되도록 구성
+  디자인 토큰 — doeep 컨셉 그린
+  #52755D  #0CC769  #2DA166  #076625  #1AB836
 */
 @theme {
   --font-sans: "IBM Plex Sans KR", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --color-brand-50: #f0fdfa;
-  --color-brand-100: #ccfbf1;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
+  --font-brand: "Comfortaa", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* brand */
+  --color-brand-50: #eef8f1;
+  --color-brand-100: #d4f0de;
+  --color-brand-500: #0cc769;
+  --color-brand-600: #2da166;
+  --color-brand-700: #076625;
+  --color-brand-800: #05501d;
+
+  /* teal 유틸을 컨셉 그린으로 매핑 (기존 teal-* 클래스 일괄 반영) */
+  --color-teal-50: #eef8f1;
+  --color-teal-100: #d4f0de;
+  --color-teal-200: #a8e0bc;
+  --color-teal-300: #6dcb8f;
+  --color-teal-400: #1ab836;
+  --color-teal-500: #0cc769;
+  --color-teal-600: #2da166;
+  --color-teal-700: #076625;
+  --color-teal-800: #05501d;
+  --color-teal-900: #043d16;
+  --color-teal-950: #032a0f;
+
   --color-surface: #f8fafc;
   --color-panel: #ffffff;
   --color-border: #e2e8f0;
   --color-ink: #0f172a;
-  --color-muted: #64748b;
+  --color-muted: #52755d;
 }
 
 * {
@@ -34,11 +50,16 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   background:
-    radial-gradient(ellipse 80% 50% at 0% -20%, rgba(20, 184, 166, 0.08), transparent),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(15, 23, 42, 0.04), transparent),
+    radial-gradient(ellipse 80% 50% at 0% -20%, rgba(45, 161, 102, 0.1), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(7, 102, 37, 0.05), transparent),
     var(--color-surface);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
+}
+
+.font-brand {
+  font-family: var(--font-brand);
+  letter-spacing: -0.03em;
 }
 
 /* 스크롤바 미세 조정 (대시보드 UX) */

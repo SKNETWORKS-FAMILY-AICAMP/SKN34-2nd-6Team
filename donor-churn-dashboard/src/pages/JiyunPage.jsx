@@ -39,7 +39,7 @@ export default function JiyunPage() {
   const [donors, setDonors] = useState([])
   const [donorsLoading, setDonorsLoading] = useState(true)
   const [donorsError, setDonorsError] = useState('')
-  const [filterHigh, setFilterHigh] = useState(false)
+  const [sortByRisk, setSortByRisk] = useState(false)
 
   const [selected, setSelected] = useState(null)
   const [suggestOpen, setSuggestOpen] = useState(false)
@@ -109,9 +109,11 @@ export default function JiyunPage() {
   }, [user])
 
   const visibleDonors = useMemo(() => {
-    if (!filterHigh) return donors
-    return donors.filter((d) => d.risk_level === 'High')
-  }, [donors, filterHigh])
+    if (!sortByRisk) return donors
+    return [...donors].sort(
+      (a, b) => Number(b.probability ?? 0) - Number(a.probability ?? 0),
+    )
+  }, [donors, sortByRisk])
 
   const stats = useMemo(() => {
     const high = donors.filter((d) => d.risk_level === 'High').length
@@ -365,14 +367,14 @@ export default function JiyunPage() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setFilterHigh((v) => !v)}
+              onClick={() => setSortByRisk((v) => !v)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
-                filterHigh
+                sortByRisk
                   ? 'border-rose-200 bg-rose-50 text-rose-700'
                   : 'border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
-              {filterHigh ? '고위험만 보는 중' : '고위험만 보기'}
+              {sortByRisk ? '위험도 높은 순 적용 중' : '위험도 높은 순'}
             </button>
             <button
               type="button"

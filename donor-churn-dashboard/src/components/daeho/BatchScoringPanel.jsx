@@ -5,13 +5,13 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  ArrowRight,
-  BarChart3,
   Upload,
   Download,
   Loader2,
   Filter,
   Radio,
+  BarChart3,
+  ArrowRight,
 } from 'lucide-react'
 import {
   BarChart,
@@ -59,7 +59,7 @@ export default function BatchScoringPanel({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [batch, setBatch] = useState(() => (isPreview ? null : loadLatestBatch()?.batch ?? null))
-  const [filterHigh, setFilterHigh] = useState(false)
+  const [sortByRisk, setSortByRisk] = useState(false)
   const [selected, setSelected] = useState(null)
   const [restingIds, setRestingIds] = useState(() => new Set())
   const [suggestedRestIds, setSuggestedRestIds] = useState(() => new Set())
@@ -72,9 +72,11 @@ export default function BatchScoringPanel({
   const rows = useMemo(() => {
     if (!batch?.results) return []
     const scored = batch.results.filter((r) => r.probability != null)
-    if (filterHigh) return scored.filter((r) => r.risk_level === 'High')
-    return scored
-  }, [batch, filterHigh])
+    if (!sortByRisk) return scored
+    return [...scored].sort(
+      (a, b) => Number(b.probability ?? 0) - Number(a.probability ?? 0),
+    )
+  }, [batch, sortByRisk])
 
   const showToast = (message) => {
     setToast(message)
@@ -100,11 +102,14 @@ export default function BatchScoringPanel({
   }
 
   const guardAction = (e) => {
-    if (isPreview && !loggedIn) {
-      e?.preventDefault()
+    if (!isPreview) return
+    e?.preventDefault()
+    if (!loggedIn) {
       if (onRequireLogin) onRequireLogin()
       else requireLogin(navigate, '/')
+      return
     }
+    navigate('/daeho')
   }
 
   const handleUpload = async () => {
@@ -288,10 +293,7 @@ export default function BatchScoringPanel({
                 type="file"
                 accept=".csv,.xlsx,.xls"
                 className="hidden"
-                onChange={(e) => {
-                  setFile(e.target.files?.[0] ?? null)
-                  e.target.value = ''
-                }}
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               />
             </label>
           )}
@@ -314,7 +316,7 @@ export default function BatchScoringPanel({
         <>
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3">
             <p className="text-xs font-medium text-teal-800">
-              예측이 완료됐어요. 인구통계별 이탈 통계와 맞춤 솔루션을 확인해 보세요.
+              예측이 완료되었습니다. 인구통계별 이탈 통계와 맞춤 솔루션을 확인해 보세요.
             </p>
             <Link
               to="/jeongseok"
@@ -393,15 +395,15 @@ export default function BatchScoringPanel({
               </h2>
               <button
                 type="button"
-                onClick={() => setFilterHigh((v) => !v)}
+                onClick={() => setSortByRisk((v) => !v)}
                 className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium ${
-                  filterHigh
+                  sortByRisk
                     ? 'border-rose-200 bg-rose-50 text-rose-700'
                     : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
                 <Filter className="h-3.5 w-3.5" />
-                {filterHigh ? '고위험만 표시 중' : '고위험만 보기'}
+                {sortByRisk ? '위험도 높은 순 적용 중' : '위험도 높은 순'}
               </button>
             </div>
 
