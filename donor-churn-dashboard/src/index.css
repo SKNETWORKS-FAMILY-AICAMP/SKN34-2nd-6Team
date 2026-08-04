@@ -3,11 +3,10 @@
 /*
   디자인 토큰
   - 중립 팔레트(slate) + 포인트 컬러 1개(teal)
-  - 홈 랜딩용 display 폰트 + 그라데이션 헤딩
+  - 향후 다크모드 확장 시 CSS 변수만 교체하면 되도록 구성
 */
 @theme {
   --font-sans: "IBM Plex Sans KR", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Syne", "IBM Plex Sans KR", ui-sans-serif, system-ui, sans-serif;
   --color-brand-50: #f0fdfa;
   --color-brand-100: #ccfbf1;
   --color-brand-500: #14b8a6;
@@ -33,7 +32,6 @@ body,
 
 body {
   margin: 0;
-  padding: 0;
   font-family: var(--font-sans);
   background:
     radial-gradient(ellipse 80% 50% at 0% -20%, rgba(20, 184, 166, 0.08), transparent),
@@ -41,17 +39,6 @@ body {
     var(--color-surface);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
-}
-
-.font-display {
-  font-family: var(--font-display);
-}
-
-.home-hero-heading {
-  background: linear-gradient(180deg, #5f6b7a 0%, #c5d5e0 55%, #e8f1f6 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 /* 스크롤바 미세 조정 (대시보드 UX) */
@@ -64,7 +51,7 @@ body {
   border-radius: 999px;
 }
 
-/* legacy home motion (fallback) */
+/* Home landing motion */
 @keyframes home-fade-up {
   from {
     opacity: 0;
