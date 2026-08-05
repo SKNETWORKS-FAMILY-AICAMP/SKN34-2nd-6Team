@@ -34,15 +34,15 @@
 <td align="center"><img src="donor-churn-dashboard/public/team/hongjiyun.png" width="100" /></td>
 </tr>
 <tr>
-<td align="center"><b>김대호</b></td>
 <td align="center"><b>황호순</b></td>
+<td align="center"><b>김대호</b></td>
 <td align="center"><b>김진화</b></td>
 <td align="center"><b>채정석</b></td>
 <td align="center"><b>홍지윤</b></td>
 </tr>
 <tr>
-<td align="center"><a href="https://github.com/kimdaeho">@kimdaeho</a></td>
 <td align="center"><a href="https://github.com/Amber8800">@Amber8800</a></td>
+<td align="center"><a href="https://github.com/kimdaeho">@kimdaeho</a></td>
 <td align="center"><a href="https://github.com/masquerade0425-hash">@masquerade0425-hash</a></td>
 <td align="center"><a href="https://github.com/qnfdhk-rgb">@qnfdhk-rgb</a></td>
 <td align="center"><a href="https://github.com/JiYoon241111">@JiYoon241111</a></td>
@@ -53,8 +53,8 @@
 
 | 이름 | 담당 기능 |
 |---|---|
-| 김대호 | 프로토타입·배포(Docker/Railway), 기부자 관리(배치 예측·후속조치), AWS Bedrock AI 메시지 구현, ML 백엔드 |
 | 황호순 | PM / 데이터 전처리 / 머신러닝 모델 학습 / 모델 히스토리 페이지 담당 / 문서 작성 |
+| 김대호 | 프로토타입·배포(Docker/Railway), 기부자 관리(배치 예측·후속조치), AWS Bedrock AI 메시지 구현, ML 백엔드 |
 | 김진화 | 이탈 데이터 시각화 (별도 브랜치에서 작업 중, main 미병합) |
 | 채정석 | 통계 및 솔루션 페이지 구축 / README 제작 |
 | 홍지윤 | Firebase/Kakao 로그인, Firestore 기반 기부자 명단·활동 기록 |
@@ -261,8 +261,8 @@ macOS/Linux는 `./setup.sh`, `./run-backend.sh`를 사용하세요.
 
 | 이름 | 회고 |
 |---|---|
-| 김대호 | <!-- TODO(팀): 한마디 추가 --> |
 | 황호순 | 팀장으로서 프로젝트를 이끌면서 브랜치 관리가 생각했던것보다 매끄럽게 되지 않았던점이 아쉽지만 팀원분들이 잘 따라와 주시고 소통이 잘되어 트러블이 적어 비교적 원만하게 프로젝트를 마무리 할 수 있었습니다. |
+| 김대호 | <!-- TODO(팀): 한마디 추가 --> |
 | 김진화 | <!-- TODO(팀): 한마디 추가 --> |
 | 채정석 | 주제가 빠르게 정해진 덕분에 프로젝트를 신속하게 진행할 수 있었습니다. 각자 맡은 부분을 진행하는 과정에서 비전공자로서 부족했던 부분을 팀원들이 채워주었고, 그 과정에서 함께 학습하며 성장할 수 있었던 좋은 기회였습니다. 특히 '기부자 이탈 관리'라는 흥미로운 주제를 머신러닝으로 학습시켜 이탈 가능성이 높은 대상을 예측하고, 이를 바탕으로 소비자와 관리자 양쪽 입장에서 활용 가능한 비즈니스 모델로 연결해본 과정과 결과는 값진 경험이었습니다. |
 | 홍지윤 | <!-- TODO(팀): 한마디 추가 --> |
