@@ -130,16 +130,9 @@
 
 ### 서비스 흐름
 
-```
-후원자 명단(CSV/Excel) 업로드
-        │
-        ▼
-[기부자 관리 /donors] 이탈 확률·위험도·추천 채널 계산 (XGBoost)
-        │
-        ├─► [통계 및 솔루션 /insights] 인구통계별 이탈 통계 + 세그먼트 맞춤 솔루션
-        ├─► [모델 히스토리 /models] 어떤 모델을 왜 선택했는지 확인
-        └─► [마이페이지 /mypage] 후원자 명단 누적 관리 + 후속 조치(문자/이메일/쉬어가기) 기록
-```
+<p align="center">
+  <img src="docs/donor-data-workflow.png" alt="후원자 데이터 워크플로우 (XGBoost)" width="100%" />
+</p>
 
 ---
 
