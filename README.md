@@ -146,20 +146,7 @@
 
 ## 시스템 아키텍처
 
-```mermaid
-flowchart LR
-  U["후원자 CSV/Excel"] --> FE["React 대시보드<br/>(Vercel 배포)"]
-  FE -->|POST /predict/batch| API["FastAPI ml-backend<br/>(Railway · Docker)"]
-  API --> PRE["전처리 · 컬럼 매핑<br/>(column_map / preprocess)"]
-  PRE --> MODEL["XGBoost_model_v2.joblib"]
-  MODEL --> API
-  API -->|이탈확률 · 위험도 · JSON| FE
-
-  FE -->|POST /copy/draft| BEDROCK["AWS Bedrock<br/>(Claude Haiku 4.5)"]
-  BEDROCK -->|SMS/이메일 초안| FE
-
-  FE <-->|"Auth / 명단·활동 기록"| FIREBASE["Firebase<br/>Auth + Firestore"]
-```
+![시스템 아키텍처](docs/system-architecture.png)
 
 - **Frontend**: [https://doeep.vercel.app/](https://doeep.vercel.app/) (Vercel)
 - **Backend**: Railway (`Dockerfile` + `railway.toml`, `/health`로 헬스체크)
