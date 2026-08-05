@@ -75,11 +75,31 @@
 <td align="center"><b>홍지윤</b></td>
 </tr>
 <tr>
-<td align="center"><a href="https://github.com/Amber8800">@Amber8800</a></td>
-<td align="center"><a href="https://github.com/kimdaeho">@kimdaeho</a></td>
-<td align="center"><a href="https://github.com/masquerade0425-hash">@masquerade0425-hash</a></td>
-<td align="center"><a href="https://github.com/qnfdhk-rgb">@qnfdhk-rgb</a></td>
-<td align="center"><a href="https://github.com/JiYoon241111">@JiYoon241111</a></td>
+<td align="center">
+  <a href="https://github.com/Amber8800">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+</td>
+<td align="center">
+  <a href="https://github.com/kimdaeho">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+</td>
+<td align="center">
+  <a href="https://github.com/masquerade0425-hash">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+</td>
+<td align="center">
+  <a href="https://github.com/qnfdhk-rgb">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+</td>
+<td align="center">
+  <a href="https://github.com/JiYoon241111">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+</td>
 </tr>
 </table>
 
