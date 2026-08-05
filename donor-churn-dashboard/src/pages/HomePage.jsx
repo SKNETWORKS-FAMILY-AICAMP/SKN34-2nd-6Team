@@ -3,8 +3,8 @@
  */
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowDown, ArrowRight } from 'lucide-react'
-import BatchScoringPanel from '../components/daeho/BatchScoringPanel'
-import JeongseokPreviewPanel from '../components/jeongseok/JeongseokPreviewPanel'
+import BatchScoringPanel from '../components/donors/BatchScoringPanel'
+import InsightsPreviewPanel from '../components/insights/InsightsPreviewPanel'
 import FeatureVisualCards from '../components/home/FeatureVisualCards'
 import { useAuth } from '../context/AuthContext'
 import { requireLogin } from '../utils/requireLogin'
@@ -104,7 +104,7 @@ export default function HomePage() {
           {isAuthenticated ? (
             <div className="mt-6">
               <Link
-                to="/daeho"
+                to="/donors"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:underline"
               >
                 전체 기능으로 이동
@@ -126,10 +126,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Jeongseok solutions preview */}
+      {/* Insights solutions preview */}
       <section id="solutions-preview" className="scroll-mt-20 border-t border-slate-200 bg-white py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-8 max-w-2xl space-y-2">
+          <div className="mb-8 max-w-2xl space-y-3">
             <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
               통계 및 솔루션 미리보기
             </h2>
@@ -139,14 +139,14 @@ export default function HomePage() {
                 : '로그인 후 전체 기능을 사용할 수 있습니다.'}
             </p>
           </div>
-          <JeongseokPreviewPanel
+          <InsightsPreviewPanel
             isAuthenticated={isAuthenticated}
             onRequireLogin={handleRequireLogin}
           />
           {isAuthenticated ? (
             <div className="mt-6">
               <Link
-                to="/jeongseok"
+                to="/insights"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:underline"
               >
                 전체 기능으로 이동
@@ -176,8 +176,8 @@ export default function HomePage() {
               우리가 하는 일
             </h2>
             <p className="text-sm leading-relaxed text-slate-500 sm:text-base">
-              예측에서 통계·솔루션, 모델 히스토리까지 — 각 영역으로 이동해 기부
-              여정을 이어 붙입니다.
+              이탈을 예측하고, 원인을 읽고, 더 나은 모델을 고르는 일까지 doeep이
+              하는 일을 한눈에 보세요.
             </p>
           </div>
 

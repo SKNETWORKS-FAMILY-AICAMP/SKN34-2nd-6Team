@@ -16,18 +16,18 @@ const C = {
 
 const HOME_CARDS = [
   {
-    id: 'daeho',
-    tagline: '기부자와의 관계를 더 오래 이어갑니다.',
+    id: 'donors',
+    tagline: '파일을 올리면 이탈 위험을 한눈에 볼 수 있습니다.',
     art: 'donors',
   },
   {
-    id: 'jeongseok',
-    tagline: '데이터 속 변화의 흐름을 발견합니다.',
+    id: 'insights',
+    tagline: '인구통계별로 이탈 패턴과 대응을 확인합니다.',
     art: 'stats',
   },
   {
-    id: 'hosun',
-    tagline: '더 나은 선택을 위한 기준을 확인합니다.',
+    id: 'models',
+    tagline: '어떤 모델을 왜 골랐는지 비교해 볼 수 있습니다.',
     art: 'model',
   },
 ]

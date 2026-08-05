@@ -27,10 +27,18 @@ import { requireLogin } from '../../utils/requireLogin'
 import { useAuth } from '../../context/AuthContext'
 import { upsertDonorsFromBatch } from '../../services/donorRosterDb'
 import { loadLatestBatch, saveLatestBatch } from '../../services/latestBatchStore'
+import DonationDropLoader from './DonationDropLoader'
 import DonorResultTable from './DonorResultTable'
 import DonorDetailDrawer from './DonorDetailDrawer'
 import RestSuggestModal from './RestSuggestModal'
 import RestConfirmModal from './RestConfirmModal'
+
+// 분석이 빨리 끝나도 기부함 애니메이션이 최소 시간만큼 보이도록 함
+const MIN_LOADING_MS = 2600
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 function ChannelTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
@@ -109,7 +117,7 @@ export default function BatchScoringPanel({
       else requireLogin(navigate, '/')
       return
     }
-    navigate('/daeho')
+    navigate('/donors')
   }
 
   const handleUpload = async () => {
@@ -124,7 +132,15 @@ export default function BatchScoringPanel({
     setLoading(true)
     setError('')
     try {
-      const data = await predictBatch(file)
+      const [outcome] = await Promise.all([
+        predictBatch(file).then(
+          (value) => ({ ok: true, value }),
+          (error) => ({ ok: false, error }),
+        ),
+        wait(MIN_LOADING_MS),
+      ])
+      if (!outcome.ok) throw outcome.error
+      const data = outcome.value
       setBatch(data)
       saveLatestBatch(data)
       setSelected(null)
@@ -312,14 +328,20 @@ export default function BatchScoringPanel({
         ) : null}
       </section>
 
-      {!isPreview && batch ? (
+      {!isPreview && loading ? (
+        <section className="rounded-xl border border-teal-100 bg-teal-50/40 p-5 shadow-sm">
+          <DonationDropLoader />
+        </section>
+      ) : null}
+
+      {!isPreview && !loading && batch ? (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3">
             <p className="text-xs font-medium text-teal-800">
               예측이 완료되었습니다. 인구통계별 이탈 통계와 맞춤 솔루션을 확인해 보세요.
             </p>
             <Link
-              to="/jeongseok"
+              to="/insights"
               className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-teal-700"
             >
               <BarChart3 className="h-3.5 w-3.5" />

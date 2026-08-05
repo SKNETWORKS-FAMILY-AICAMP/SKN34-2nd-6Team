@@ -1,5 +1,5 @@
 /**
- * JiyunPage — 마이페이지 (프로필 + 누적 기부자 명단 + 상세 후속 조치)
+ * MyPage — 마이페이지 (프로필 + 누적 기부자 명단 + 상세 후속 조치)
  */
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -15,9 +15,9 @@ import {
 } from '../services/donorRosterDb'
 import { riskLabel } from '../utils/riskLabels'
 import Badge from '../components/common/Badge'
-import DonorDetailDrawer from '../components/daeho/DonorDetailDrawer'
-import RestSuggestModal from '../components/daeho/RestSuggestModal'
-import RestConfirmModal from '../components/daeho/RestConfirmModal'
+import DonorDetailDrawer from '../components/donors/DonorDetailDrawer'
+import RestSuggestModal from '../components/donors/RestSuggestModal'
+import RestConfirmModal from '../components/donors/RestConfirmModal'
 
 function toDrawerRow(donor) {
   return {
@@ -26,7 +26,7 @@ function toDrawerRow(donor) {
   }
 }
 
-export default function JiyunPage() {
+export default function MyPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const isKakao = user?.provider === 'kakao'
@@ -49,7 +49,7 @@ export default function JiyunPage() {
   useEffect(() => {
     if (authLoading) return
     if (!isAuthenticated) {
-      requireLogin(navigate, '/jiyun')
+      requireLogin(navigate, '/mypage')
     }
   }, [authLoading, isAuthenticated, navigate])
 
@@ -282,7 +282,7 @@ export default function JiyunPage() {
           </p>
         </div>
         <Link
-          to="/daeho"
+          to="/donors"
           className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700"
         >
           기부자 관리로 이동
@@ -400,7 +400,7 @@ export default function JiyunPage() {
           <div className="rounded-lg border border-dashed border-slate-200 px-4 py-10 text-center">
             <p className="text-sm text-slate-500">아직 저장된 기부자가 없습니다.</p>
             <Link
-              to="/daeho"
+              to="/donors"
               className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline"
             >
               기부자 관리에서 파일 업로드하기

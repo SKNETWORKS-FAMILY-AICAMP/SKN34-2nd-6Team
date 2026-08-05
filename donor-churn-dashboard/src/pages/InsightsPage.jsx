@@ -1,5 +1,5 @@
 /**
- * JeongseokPage — 정석 담당: 기부자 관리(배치 예측) 결과를 바탕으로 인구통계 8개 컬럼의
+ * InsightsPage — 기부자 관리(배치 예측) 결과를 바탕으로 인구통계 8개 컬럼의
  * 이탈 통계와 맞춤 솔루션을 보여준다. 자료를 아직 분석하지 않았다면 기부자 관리로
  * 이동할 수 있는 안내 화면을 보여주고, 분석 결과가 있으면 버튼 없이 바로 그 데이터로
  * 그래프를 그린다.
@@ -8,10 +8,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, BarChart3, Sparkles, UploadCloud, Users } from 'lucide-react'
-import DemographicChartPanel from '../components/jeongseok/DemographicChartPanel'
-import SolutionModal from '../components/jeongseok/SolutionModal'
-import { DEMOGRAPHIC_CHURN } from '../components/jeongseok/demographicChurnData'
-import { computeLiveDemographicChurn } from '../components/jeongseok/liveChurnStats'
+import DemographicChartPanel from '../components/insights/DemographicChartPanel'
+import SolutionModal from '../components/insights/SolutionModal'
+import { DEMOGRAPHIC_CHURN } from '../components/insights/demographicChurnData'
+import { computeLiveDemographicChurn } from '../components/insights/liveChurnStats'
 import { loadLatestBatch, loadPersistedBatch, subscribeLatestBatch } from '../services/latestBatchStore'
 
 function formatSavedAt(ts) {
@@ -68,7 +68,7 @@ function EmptyState({ onPreview, hasPersisted, onViewPersisted }) {
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link
-            to="/daeho"
+            to="/donors"
             className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700"
           >
             <UploadCloud className="h-4 w-4" />
@@ -111,7 +111,7 @@ function SampleBanner({ onClose }) {
       </p>
       <div className="flex shrink-0 items-center gap-2">
         <Link
-          to="/daeho"
+          to="/donors"
           className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
         >
           기부자 관리로 이동
@@ -141,7 +141,7 @@ function LiveStatsBar({ batch, savedAt }) {
         {savedAt ? <span className="text-teal-600/80">최근 분석 {formatSavedAt(savedAt)}</span> : null}
       </p>
       <Link
-        to="/daeho"
+        to="/donors"
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 hover:underline"
       >
         새 자료로 다시 분석하기
@@ -151,7 +151,7 @@ function LiveStatsBar({ batch, savedAt }) {
   )
 }
 
-export default function JeongseokPage() {
+export default function InsightsPage() {
   const [selectedId, setSelectedId] = useState(null)
   const [latest, setLatest] = useState(() => loadLatestBatch())
   const [showSample, setShowSample] = useState(false)

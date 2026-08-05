@@ -1,13 +1,13 @@
 /**
- * JeongseokPreviewPanel — 홈 메인용 통계 및 솔루션 미리보기
- * 예시(학습) 데이터 차트를 보여주고, 상호작용 시 로그인 유도 또는 /jeongseok 이동
+ * InsightsPreviewPanel — 홈 메인용 통계 및 솔루션 미리보기
+ * 예시(학습) 데이터 차트를 보여주고, 상호작용 시 로그인 유도 또는 /insights 이동
  */
 import { useNavigate } from 'react-router-dom'
 import DemographicChartPanel from './DemographicChartPanel'
 import { DEMOGRAPHIC_CHURN } from './demographicChurnData'
 import { requireLogin } from '../../utils/requireLogin'
 
-export default function JeongseokPreviewPanel({
+export default function InsightsPreviewPanel({
   isAuthenticated = false,
   onRequireLogin,
 }) {
@@ -21,7 +21,7 @@ export default function JeongseokPreviewPanel({
       else requireLogin(navigate, '/')
       return
     }
-    navigate('/jeongseok')
+    navigate('/insights')
   }
 
   return (

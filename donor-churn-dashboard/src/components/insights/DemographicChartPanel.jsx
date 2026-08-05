@@ -104,7 +104,7 @@ export default function DemographicChartPanel({
           <h2 className="text-sm font-semibold text-slate-900">{active.title}</h2>
           {isLive && active.isReference ? (
             <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-              업로드 자료에 없어 학습 데이터 참고값
+              
             </span>
           ) : null}
         </div>

@@ -1,6 +1,6 @@
-import ModelEvaluationExplorer from '../components/hosun/ModelEvaluationExplorer'
+import ModelEvaluationExplorer from '../components/models/ModelEvaluationExplorer'
 
-export default function HosunPage() {
+export default function ModelsPage() {
   return (
     <div className="space-y-8">
       <header className="max-w-3xl">

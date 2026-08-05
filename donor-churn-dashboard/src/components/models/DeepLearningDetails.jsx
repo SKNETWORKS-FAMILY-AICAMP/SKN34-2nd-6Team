@@ -32,13 +32,7 @@ export default function DeepLearningDetails({ model }) {
         <TrainingCard label="테스트 손실" value={model.trainingConfig.testLoss.toFixed(4)} detail={`최대 epoch ${model.trainingConfig.maxEpochs.toLocaleString()}`} />
       </section>
 
-      <section className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5">
-        <h2 className="text-sm font-semibold text-slate-700">학습 이력 차트</h2>
-        <p className="mt-1 text-xs leading-5 text-slate-400">
-          노트북은 train loss, validation loss, validation accuracy, validation AUC를 학습 중
-          기록하지만 epoch별 배열을 출력하거나 저장하지 않아 임의 차트를 생성하지 않았습니다.
-        </p>
-      </section>
+     
     </div>
   )
 }

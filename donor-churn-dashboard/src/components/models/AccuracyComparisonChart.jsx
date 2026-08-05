@@ -32,7 +32,7 @@ export default function AccuracyComparisonChart() {
         </p>
         <h2 className="mt-1 text-lg font-bold text-slate-900">테스트 정확도 비교</h2>
         <p className="mt-1 text-xs text-slate-500">
-          테스트셋 903건 기준 · ML(seed 88)과 MLP(seed 42)는 분할 샘플이 다름
+         
         </p>
         <div className="mt-2 flex gap-3 text-[10px] text-slate-500">
           <span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-slate-400" />ML</span>
