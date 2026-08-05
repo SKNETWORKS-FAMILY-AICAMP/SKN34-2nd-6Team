@@ -22,14 +22,6 @@
   <a href="#"><img src="https://img.shields.io/badge/Presentation-발표_자료-475569?style=for-the-badge" alt="Presentation" /></a>
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white" />
-  <img src="https://img.shields.io/badge/XGBoost-Model-EE4C2C?style=flat-square" />
-  <img src="https://img.shields.io/badge/AWS_Bedrock-Claude-FF9900?style=flat-square&logo=amazon-aws&logoColor=white" />
-  <img src="https://img.shields.io/badge/Firebase-Auth%2BFirestore-FFCA28?style=flat-square&logo=firebase&logoColor=black" />
-</p>
-
 ---
 
 ## 목차
