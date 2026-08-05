@@ -190,13 +190,15 @@ export default function HomePage() {
           <p className="max-w-xl text-sm text-slate-600 sm:text-base">
             기부 이탈을 줄이고, 기부 문화 참여를 이어 가는 여정에 함께해 주세요.
           </p>
-          <Link
-            to="/signup"
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
-          >
-            시작하기
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          {!isAuthenticated && (
+            <Link
+              to="/signup"
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
+            >
+              시작하기
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
         </div>
       </section>
     </div>
