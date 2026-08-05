@@ -177,6 +177,13 @@
 | 백엔드 배포 | <img src="https://img.shields.io/badge/Railway-0B0D0E?style=flat-square&logo=Railway&logoColor=white"> |
 | 프론트 배포 | <img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=Vercel&logoColor=white"> |
 
+### 협업 / 프로젝트 관리
+| 분류 | 도구 |
+|---|---|
+| 버전 관리 · PR | <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=GitHub&logoColor=white"> |
+| 이슈 트래킹 | <img src="https://img.shields.io/badge/Jira-0052CC?style=flat-square&logo=Jira&logoColor=white"> |
+
+
 ## 시스템 아키텍처
 
 ![시스템 아키텍처](docs/system-architecture.png)
