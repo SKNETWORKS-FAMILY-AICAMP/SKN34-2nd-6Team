@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="610" viewBox="0 0 760 610" role="img" aria-labelledby="title desc">
+  <title id="title">MLP 혼동 행렬</title>
+  <desc id="desc">확률 임계값 0.36을 적용한 MLP의 테스트 데이터 정규화 혼동 행렬</desc>
+  <rect width="760" height="610" fill="#ffffff"/>
+  <style>
+    text { font-family: "Malgun Gothic", "Apple SD Gothic Neo", Arial, sans-serif; }
+    .title { font-size: 28px; font-weight: 700; fill: #111827; }
+    .subtitle { font-size: 16px; fill: #6b7280; }
+    .label { font-size: 18px; fill: #1f2937; }
+    .axis { font-size: 19px; font-weight: 700; fill: #111827; }
+    .percent { font-size: 27px; font-weight: 700; }
+    .note { font-size: 14px; fill: #6b7280; }
+  </style>
+  <text x="380" y="42" text-anchor="middle" class="title">MLP 혼동 행렬</text>
+  <text x="380" y="70" text-anchor="middle" class="subtitle">Validation 선택 임계값 0.36 · Test 903건</text>
+  <text x="320" y="112" text-anchor="middle" class="label">비이탈 (1)</text>
+  <text x="540" y="112" text-anchor="middle" class="label">이탈 위험군 (2)</text>
+  <text x="190" y="226" text-anchor="end" class="label">비이탈 (1)</text>
+  <text x="190" y="406" text-anchor="end" class="label">이탈 위험군 (2)</text>
+  <rect x="210" y="130" width="220" height="180" fill="#83b6d9" stroke="#ffffff" stroke-width="2"/>
+  <rect x="430" y="130" width="220" height="180" fill="#a5cbe4" stroke="#ffffff" stroke-width="2"/>
+  <rect x="210" y="310" width="220" height="180" fill="#cbe1ef" stroke="#ffffff" stroke-width="2"/>
+  <rect x="430" y="310" width="220" height="180" fill="#589aca" stroke="#ffffff" stroke-width="2"/>
+  <text x="320" y="230" text-anchor="middle" class="percent" fill="#111827">54.5%</text>
+  <text x="540" y="230" text-anchor="middle" class="percent" fill="#111827">45.5%</text>
+  <text x="320" y="410" text-anchor="middle" class="percent" fill="#111827">32.6%</text>
+  <text x="540" y="410" text-anchor="middle" class="percent" fill="#ffffff">67.4%</text>
+  <text x="430" y="535" text-anchor="middle" class="axis">예측</text>
+  <text x="70" y="310" text-anchor="middle" class="axis" transform="rotate(-90 70 310)">실제</text>
+  <text x="430" y="575" text-anchor="middle" class="note">노트북 출력 기준 · 실제 클래스 내 비율</text>
+</svg>
