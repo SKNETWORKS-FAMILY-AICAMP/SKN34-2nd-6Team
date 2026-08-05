@@ -17,9 +17,9 @@
 <p align="center">
   <a href="https://doeep.vercel.app/"><img src="https://img.shields.io/badge/Demo-doeep.vercel.app-0D9488?style=for-the-badge&logo=vercel&logoColor=white" alt="Demo" /></a>
   &nbsp;
-  <a href="#"><img src="https://img.shields.io/badge/Demo_Video-시연_영상-64748B?style=for-the-badge&logo=youtube&logoColor=white" alt="Demo Video" /></a>
-  &nbsp;
-  <a href="#"><img src="https://img.shields.io/badge/Presentation-발표_자료-475569?style=for-the-badge" alt="Presentation" /></a>
+<a href="https://youtu.be/R0wtvuNXRWg" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Demo_Video-시연_영상-64748B?style=for-the-badge&logo=youtube&logoColor=white" alt="Demo Video" />
+</a>
 </p>
 
 ---
