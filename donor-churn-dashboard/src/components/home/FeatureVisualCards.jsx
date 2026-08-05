@@ -1,7 +1,9 @@
 /**
  * FeatureVisualCards — 홈 「우리가 하는 일」 비주얼 카드
+ * hover 시 카드별 미리보기(영상/GIF) 재생, 클릭 시 해당 페이지로 이동
  * 컨셉 그린: #52755D #0CC769 #2DA166 #076625 #1AB836
  */
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BrainCircuit, Check, User } from 'lucide-react'
 import { FEATURE_LINKS } from '../../data/featureLinks'
@@ -19,16 +21,22 @@ const HOME_CARDS = [
     id: 'donors',
     tagline: '파일을 올리면 이탈 위험을 한눈에 볼 수 있습니다.',
     art: 'donors',
+    preview: '/features/donors-preview.gif',
+    previewType: 'image',
   },
   {
     id: 'insights',
     tagline: '인구통계별로 이탈 패턴과 대응을 확인합니다.',
     art: 'stats',
+    preview: '/features/insights-preview.gif',
+    previewType: 'image',
   },
   {
     id: 'models',
     tagline: '어떤 모델을 왜 골랐는지 비교해 볼 수 있습니다.',
     art: 'model',
+    preview: '/features/models-preview.gif',
+    previewType: 'image',
   },
 ]
 
@@ -151,6 +159,58 @@ function Art({ type }) {
   return <ModelArt />
 }
 
+function FeatureCard({ card }) {
+  const [playing, setPlaying] = useState(false)
+  const [playKey, setPlayKey] = useState(0)
+
+  return (
+    <li>
+      <Link
+        to={card.path}
+        className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-1 hover:border-[#2DA166]/50 hover:shadow-[0_16px_40px_rgba(7,102,37,0.14)]"
+        onMouseEnter={() => {
+          setPlaying(true)
+          setPlayKey((k) => k + 1)
+        }}
+        onMouseLeave={() => setPlaying(false)}
+        onFocus={() => {
+          setPlaying(true)
+          setPlayKey((k) => k + 1)
+        }}
+        onBlur={() => setPlaying(false)}
+      >
+        <div className="relative aspect-[5/4] w-full overflow-hidden bg-slate-50 sm:aspect-[4/3]">
+          {playing ? (
+            <img
+              key={playKey}
+              src={card.preview}
+              alt={`${card.name} 미리보기`}
+              className="absolute inset-0 h-full w-full object-cover object-top"
+              draggable={false}
+            />
+          ) : (
+            <Art type={card.art} />
+          )}
+        </div>
+        <div className="flex flex-1 flex-col px-5 pb-6 pt-5 sm:px-6">
+          <h3
+            className="text-lg font-bold tracking-tight sm:text-xl"
+            style={{ color: C.forest }}
+          >
+            {card.name}
+          </h3>
+          <p
+            className="mt-2 text-sm leading-relaxed sm:text-[0.95rem]"
+            style={{ color: C.muted }}
+          >
+            {card.tagline}
+          </p>
+        </div>
+      </Link>
+    </li>
+  )
+}
+
 export default function FeatureVisualCards() {
   const cards = HOME_CARDS.map((card) => {
     const link = FEATURE_LINKS.find((f) => f.id === card.id)
@@ -160,30 +220,7 @@ export default function FeatureVisualCards() {
   return (
     <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {cards.map((card) => (
-        <li key={card.id}>
-          <Link
-            to={card.path}
-            className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-1 hover:border-[#2DA166]/50 hover:shadow-[0_16px_40px_rgba(7,102,37,0.14)]"
-          >
-            <div className="aspect-[5/4] w-full overflow-hidden sm:aspect-[4/3]">
-              <Art type={card.art} />
-            </div>
-            <div className="flex flex-1 flex-col px-5 pb-6 pt-5 sm:px-6">
-              <h3
-                className="text-lg font-bold tracking-tight sm:text-xl"
-                style={{ color: C.forest }}
-              >
-                {card.name}
-              </h3>
-              <p
-                className="mt-2 text-sm leading-relaxed sm:text-[0.95rem]"
-                style={{ color: C.muted }}
-              >
-                {card.tagline}
-              </p>
-            </div>
-          </Link>
-        </li>
+        <FeatureCard key={card.id} card={card} />
       ))}
     </ul>
   )
