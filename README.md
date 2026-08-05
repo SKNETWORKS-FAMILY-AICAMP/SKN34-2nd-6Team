@@ -27,14 +27,14 @@
 <col width="20%"><col width="20%"><col width="20%"><col width="20%"><col width="20%">
 </colgroup>
 <tr>
-<td align="center"><img src="donor-churn-dashboard/public/team/kimdaeho.png" width="100" /></td>
 <td align="center"><img src="donor-churn-dashboard/public/team/hwanghosun.png" width="100" /></td>
+<td align="center"><img src="donor-churn-dashboard/public/team/kimdaeho.png" width="100" /></td>
 <td align="center"><img src="donor-churn-dashboard/public/team/kimjinhwa.png" width="100" /></td>
 <td align="center"><img src="donor-churn-dashboard/public/team/chaejeongseok.png" width="100" /></td>
 <td align="center"><img src="donor-churn-dashboard/public/team/hongjiyun.png" width="100" /></td>
 </tr>
 <tr>
-<td align="center"><b>황호순</b></td>
+<td align="center"><b>황호순(팀장)</b></td>
 <td align="center"><b>김대호</b></td>
 <td align="center"><b>김진화</b></td>
 <td align="center"><b>채정석</b></td>
