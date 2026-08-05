@@ -113,11 +113,11 @@
 
 </div>
 
-<h3 align="center">담당 기능</h3>
+<h3 align="center">담당 파트</h3>
 
 <div align="center">
 
-| 이름 | 담당 기능 |
+| 이름 | 담당 파트 |
 |:---:|:---|
 | 황호순 | PM , 데이터 전처리 , 머신러닝 모델 학습 , 모델 히스토리 페이지 , 문서 작성 |
 | 김대호 | 프로토타입·배포(Docker/Railway), 기부자 관리(배치 예측·후속조치), AWS Bedrock AI 메시지 구현, ML 백엔드 |
@@ -127,6 +127,7 @@
 
 </div>
 
+---
 
 ## 프로젝트 개요
 
@@ -135,12 +136,6 @@
 | 프로젝트명 | 두잎 (Doeep) |
 | 개발 기간 | 2026.07.21(화) ~ 2026.08.06(목) |
 | 한 줄 소개 | CSV/Excel로 후원자 명단을 올리면, 학습된 XGBoost 모델이 이탈 확률을 계산하고<br/>위험군별로 어떤 채널·메시지로 다시 연락하면 좋을지까지 제안하는 대시보드 |
-
-### 서비스 흐름
-
-<p align="center">
-  <img src="docs/donor-data-workflow.png" alt="후원자 데이터 워크플로우 (XGBoost)" width="100%" />
-</p>
 
 ---
 
@@ -259,6 +254,12 @@
 - **Backend**: Railway (`Dockerfile` + `railway.toml`, `/health`로 헬스체크)
 
 ---
+
+### 서비스 흐름
+
+<p align="center">
+  <img src="docs/donor-data-workflow.png" alt="후원자 데이터 워크플로우 (XGBoost)" width="100%" />
+</p>
 
 ## 핵심 기술 상세
 
