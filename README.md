@@ -338,6 +338,40 @@ macOS/Linux는 `./setup.sh`, `./run-backend.sh`를 사용하세요.
 - **백엔드**: Railway — 루트 `Dockerfile`로 이미지 빌드 (`railway.toml` 참고), `/health` 헬스체크
 - CORS는 `ml-backend/app/main.py`에서 `https://doeep.vercel.app`을 기본 허용하며, `CORS_ORIGINS` 환경변수로 추가할 수 있습니다.
 
+### 시연 예시
+
+#### 로그인 및 마이페이지
+
+| 로그인 페이지 | 마이페이지 기본 기능 |
+|:---:|:---:|
+| <img src="data/gif/로그인 페이지.gif" alt="로그인 페이지 시연" width="480" height="270" /> | <img src="data/gif/마이페이지(1-기본 기능).gif" alt="마이페이지 기본 기능 시연" width="480" height="270" /> |
+
+#### 기부자 관리
+
+| 기본 페이지 | 문자메시지 등 세부 기능 |
+|:---:|:---:|
+| <img src="data/gif/기부자 관리(1-기본 페이지).gif" alt="기부자 관리 기본 페이지 시연" width="480" height="270" /> | <img src="data/gif/기부자 관리(2-문자메시지 등 세부기능).gif" alt="기부자 관리 세부 기능 시연" width="480" height="270" /> |
+
+#### 통계 및 솔루션
+
+| 통계 1 | 통계 2 |
+|:---:|:---:|
+| <img src="data/gif/통계 및 솔루션(통계 1).gif" alt="통계 및 솔루션 통계 첫 번째 시연" width="480" height="270" /> | <img src="data/gif/통계 및 솔루션(통계 2).gif" alt="통계 및 솔루션 통계 두 번째 시연" width="480" height="270" /> |
+
+| 솔루션 1 | 솔루션 2 |
+|:---:|:---:|
+| <img src="data/gif/통계 및 솔루션(솔루션 1).gif" alt="통계 및 솔루션 첫 번째 시연" width="480" height="270" /> | <img src="data/gif/통계 및 솔루션(솔루션 2).gif" alt="통계 및 솔루션 두 번째 시연" width="480" height="270" /> |
+
+#### 모델 분석
+
+| 모델 분석 1 | 모델 분석 2 |
+|:---:|:---:|
+| <img src="data/gif/모델 분석(1).gif" alt="모델 분석 첫 번째 시연" width="480" height="270" /> | <img src="data/gif/모델 분석(2).gif" alt="모델 분석 두 번째 시연" width="480" height="270" /> |
+
+| 모델 분석 3 | 모델 분석 4 |
+|:---:|:---:|
+| <img src="data/gif/모델 분석(3).gif" alt="모델 분석 세 번째 시연" width="480" height="270" /> | <img src="data/gif/모델 분석(4).gif" alt="모델 분석 네 번째 시연" width="480" height="270" /> |
+
 ---
 
 ## 향후 계획 & 회고
