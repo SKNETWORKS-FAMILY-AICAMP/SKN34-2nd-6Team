@@ -1,25 +1,47 @@
-# 두잎(Doeep) — 정기후원자 이탈 예측 & 리텐션 대시보드
+<p align="center">
+  <img src="donor-churn-dashboard/public//doeep-mark.png" alt="Doeep" width="72" />
+</p>
 
-> 정기후원자의 이탈 확률을 예측하고, 위험군별 맞춤 채널·메시지·솔루션까지 한 번에 제안하는 비영리단체용 CRM 대시보드
->
-> <!-- TODO(팀): 한 줄 소개는 팀 합의 후 최종 문구로 다듬어 주세요 -->
+<h1 align="center">두잎 (Doeep)</h1>
 
-[배포 링크](https://doeep.vercel.app/) · [시연 영상](#) · [발표 자료](#)
+<p align="center">
+  <b>정기후원자 이탈 예측 & 리텐션 대시보드</b>
+</p>
 
-<!-- TODO(팀): 실제 배포 URL / 영상 / 발표자료 링크로 교체 -->
+<p align="center">
+  정기후원자의 이탈 확률을 예측하고,<br />
+  위험군별 맞춤 채널 · 메시지 · 솔루션까지 한 번에 제안하는<br />
+  비영리단체용 CRM 대시보드
+</p>
 
-## 📚 목차
-- [팀 소개](#팀-소개)
-- [프로젝트 개요](#프로젝트-개요)
-- [개발 배경](#개발-배경)
-- [핵심 기능](#핵심-기능)
-- [기술 스택](#기술-스택)
-- [시스템 아키텍처](#시스템-아키텍처)
-- [핵심 기술 상세](#핵심-기술-상세)
-- [프로젝트 구조](#프로젝트-구조)
-- [실행 방법](#실행-방법)
-- [향후 계획 & 회고](#향후-계획--회고)
+<p align="center">
+  <a href="https://doeep.vercel.app/"><img src="https://img.shields.io/badge/Demo-doeep.vercel.app-0D9488?style=for-the-badge&logo=vercel&logoColor=white" alt="Demo" /></a>
+  &nbsp;
+  <a href="#"><img src="https://img.shields.io/badge/Demo_Video-시연_영상-64748B?style=for-the-badge&logo=youtube&logoColor=white" alt="Demo Video" /></a>
+  &nbsp;
+  <a href="#"><img src="https://img.shields.io/badge/Presentation-발표_자료-475569?style=for-the-badge" alt="Presentation" /></a>
+</p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/XGBoost-Model-EE4C2C?style=flat-square" />
+  <img src="https://img.shields.io/badge/AWS_Bedrock-Claude-FF9900?style=flat-square&logo=amazon-aws&logoColor=white" />
+  <img src="https://img.shields.io/badge/Firebase-Auth%2BFirestore-FFCA28?style=flat-square&logo=firebase&logoColor=black" />
+</p>
+
+---
+
+## 목차
+
+| | | |
+|:---|:---|:---|
+| [팀 소개](#팀-소개) | [프로젝트 개요](#프로젝트-개요) | [개발 배경](#개발-배경) |
+| [핵심 기능](#핵심-기능) | [기술 스택](#기술-스택) | [시스템 아키텍처](#시스템-아키텍처) |
+| [핵심 기술 상세](#핵심-기술-상세) | [프로젝트 구조](#프로젝트-구조) | [실행 방법](#실행-방법) |
+| [향후 계획 & 회고](#향후-계획--회고) | | |
+
+---
 ## 팀 소개
 
 <table>
