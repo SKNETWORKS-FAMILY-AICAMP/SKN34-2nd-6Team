@@ -4,7 +4,7 @@
 >
 > <!-- TODO(팀): 한 줄 소개는 팀 합의 후 최종 문구로 다듬어 주세요 -->
 
-[배포 링크](#) · [시연 영상](#) · [발표 자료](#)
+[배포 링크](https://doeep.vercel.app/) · [시연 영상](#) · [발표 자료](#)
 
 <!-- TODO(팀): 실제 배포 URL / 영상 / 발표자료 링크로 교체 -->
 
@@ -22,20 +22,26 @@
 
 ## 팀 소개
 
-| 이름 | 담당 페이지 | 담당 기능 | GitHub |
-|---|---|---|---|
-| 김대호 | `/daeho` 기부자 관리 | 배치 이탈 예측 UI, 결과 테이블·상세 Drawer, 기부자 명단(Firestore) 연동 | [@kimdaeho](https://github.com/kimdaeho) |
-| 황호순 | `/hosun` 모델 히스토리 | 모델 비교·평가 시각화(혼동행렬, 정확도 비교), 브랜드 로고/파비콘 정리 | [@Amber8800](https://github.com/Amber8800) |
-| 김진화 | `/jinhwa` 데이터 시각화 | 이탈 데이터 시각화 (진행 중) | [@masquerade0425-hash](https://github.com/masquerade0425-hash) |
-| 채정석 | `/jeongseok` 통계 및 솔루션 | 인구통계 8개 축 이탈 통계, 위험군별 맞춤 솔루션, PDF 리포트 | [@qnfdhk-rgb](https://github.com/qnfdhk-rgb) |
-| 홍지윤 | `/jiyun` 마이페이지 | Firebase/Kakao 로그인, Firestore 기반 기부자 명단·활동 기록 | [@JiYoon241111](https://github.com/JiYoon241111) |
+| | | | | |
+|---|---|---|---|---|
+| <img src="donor-churn-dashboard/public/team/kimdaeho.png" width="100" /> | <img src="donor-churn-dashboard/public/team/hwanghosun.png" width="100" /> | <img src="donor-churn-dashboard/public/team/kimjinhwa.png" width="100" /> | <img src="donor-churn-dashboard/public/team/chaejeongseok.png" width="100" /> | <img src="donor-churn-dashboard/public/team/hongjiyun.png" width="100" /> |
+| **김대호** | **황호순** | **김진화** | **채정석** | **홍지윤** |
+| [@kimdaeho](https://github.com/kimdaeho) | [@Amber8800](https://github.com/Amber8800) | [@masquerade0425-hash](https://github.com/masquerade0425-hash) | [@qnfdhk-rgb](https://github.com/qnfdhk-rgb) | [@JiYoon241111](https://github.com/JiYoon241111) |
 
-<!-- TODO(팀): "담당 기능" 표현과 세부 역할(PM 여부 등)은 팀원 확인 후 다듬어 주세요 -->
+### 담당 기능
+
+| 이름 | 담당 기능 |
+|---|---|
+| 김대호 | 배치 이탈 예측 UI, 결과 테이블·상세 Drawer, 기부자 명단(Firestore) 연동 |
+| 황호순 | PM / 데이터 전처리 / 머신러닝 모델 학습 / 모델 히스토리 페이지 담당 / 문서 작성 |
+| 김진화 | 이탈 데이터 시각화 (별도 브랜치에서 작업 중, main 미병합) |
+| 채정석 | 통계 및 솔루션 페이지 구축 / README 제작 |
+| 홍지윤 | Firebase/Kakao 로그인, Firestore 기반 기부자 명단·활동 기록 |
 
 ## 프로젝트 개요
 
 - **프로젝트명**: 두잎(Doeep)
-- **개발 기간**: <!-- TODO(팀): 예) 2026.06.30 ~ 2026.08.05 -->
+- **개발 기간**: 2026.07.21(화) ~ 2026.08.06(목)<!-- TODO(팀): 예) 2026.06.30 ~ 2026.08.05 -->
 - **한 줄 소개**: CSV/Excel로 후원자 명단을 올리면, 학습된 XGBoost 모델이 이탈 확률을 계산하고 위험군별로 어떤 채널·메시지로 다시 연락하면 좋을지까지 제안하는 대시보드입니다.
 
 ### 서비스 흐름
@@ -44,11 +50,11 @@
 후원자 명단(CSV/Excel) 업로드
         │
         ▼
-[기부자 관리] 이탈 확률·위험도·추천 채널 계산 (XGBoost)
+[기부자 관리 /donors] 이탈 확률·위험도·추천 채널 계산 (XGBoost)
         │
-        ├─► [통계 및 솔루션] 인구통계별 이탈 통계 + 세그먼트 맞춤 솔루션
-        ├─► [모델 히스토리] 어떤 모델을 왜 선택했는지 확인
-        └─► [마이페이지] 후원자 명단 누적 관리 + 후속 조치(문자/이메일/쉬어가기) 기록
+        ├─► [통계 및 솔루션 /insights] 인구통계별 이탈 통계 + 세그먼트 맞춤 솔루션
+        ├─► [모델 히스토리 /models] 어떤 모델을 왜 선택했는지 확인
+        └─► [마이페이지 /mypage] 후원자 명단 누적 관리 + 후속 조치(문자/이메일/쉬어가기) 기록
 ```
 
 ## 개발 배경
@@ -73,30 +79,56 @@
 
 ## 기술 스택
 
-**Frontend**
-![React](https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
-![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=flat-square)
-![React Router](https://img.shields.io/badge/React_Router-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
+### Frontend
+| 분류 | 기술 |
+|---|---|
+| 프레임워크 | <img src="https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=React&logoColor=white"> |
+| 빌드 도구 | <img src="https://img.shields.io/badge/Vite_8-646CFF?style=flat-square&logo=Vite&logoColor=white"> |
+| 라우팅 | <img src="https://img.shields.io/badge/React_Router_DOM_7-CA4245?style=flat-square&logo=React%20Router&logoColor=white"> |
+| 스타일링 | <img src="https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=flat-square&logo=Tailwind%20CSS&logoColor=white"> |
+| 차트 | <img src="https://img.shields.io/badge/Recharts-22B5BF?style=flat-square"> |
+| 아이콘 | <img src="https://img.shields.io/badge/Lucide_React-000000?style=flat-square&logo=Lucide&logoColor=white"> |
+| PDF/이미지 | <img src="https://img.shields.io/badge/jsPDF-E44D26?style=flat-square"> <img src="https://img.shields.io/badge/html--to--image-4B5563?style=flat-square"> |
+| 린터 | <img src="https://img.shields.io/badge/Oxlint-EAB308?style=flat-square"> |
 
-**Backend / AI-ML**
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
-![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=flat-square&logo=python&logoColor=white)
-![scikit--learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
-![XGBoost](https://img.shields.io/badge/XGBoost-1560BD?style=flat-square)
-![AWS Bedrock](https://img.shields.io/badge/AWS_Bedrock_(Claude)-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
+### Backend / API
+| 분류 | 기술 |
+|---|---|
+| 프레임워크 | <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=FastAPI&logoColor=white"> |
+| ASGI 서버 | <img src="https://img.shields.io/badge/Uvicorn-2A308B?style=flat-square"> |
+| 스키마/검증 | <img src="https://img.shields.io/badge/Pydantic_2-E92063?style=flat-square&logo=Pydantic&logoColor=white"> |
+| 환경변수 | <img src="https://img.shields.io/badge/python--dotenv-ECD53F?style=flat-square&logo=dotenv&logoColor=black"> |
+| 파일 업로드 | <img src="https://img.shields.io/badge/python--multipart-3776AB?style=flat-square&logo=Python&logoColor=white"> |
 
-**Database / Auth / Infra**
-![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black)
-![Kakao](https://img.shields.io/badge/Kakao_Login-FFCD00?style=flat-square&logo=kakaotalk&logoColor=black)
+### ML / 데이터
+| 분류 | 기술 |
+|---|---|
+| 운영 모델 | <img src="https://img.shields.io/badge/XGBoost-AA4E01?style=flat-square">  |
+| 모델 직렬화 | <img src="https://img.shields.io/badge/joblib-3776AB?style=flat-square"> |
+| 데이터 처리 | <img src="https://img.shields.io/badge/pandas-150458?style=flat-square&logo=pandas&logoColor=white"> <img src="https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white"> <img src="https://img.shields.io/badge/openpyxl-3776AB?style=flat-square"> |
+| ML 라이브러리 | <img src="https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white"> <img src="https://img.shields.io/badge/XGBoost-AA4E01?style=flat-square"> |
+| 비교·실험 모델 | <img src="https://img.shields.io/badge/Random_Forest-2E7D32?style=flat-square"> <img src="https://img.shields.io/badge/Logistic_Regression-1565C0?style=flat-square"> <img src="https://img.shields.io/badge/Gradient_Boosting-6D4C41?style=flat-square"> <img src="https://img.shields.io/badge/CatBoost-FFCC00?style=flat-square&logo=CatBoost&logoColor=black"> <img src="https://img.shields.io/badge/MLP-7C3AED?style=flat-square"> |
+
+### 인증 / 데이터 저장
+| 분류 | 기술 |
+|---|---|
+| Auth + DB | <img src="https://img.shields.io/badge/Firebase_Auth-FFCA28?style=flat-square&logo=Firebase&logoColor=black"> <img src="https://img.shields.io/badge/Cloud_Firestore-FFCA28?style=flat-square&logo=Firebase&logoColor=black"> |
+| 소셜 로그인 | <img src="https://img.shields.io/badge/Google-4285F4?style=flat-square&logo=Google&logoColor=white"> <img src="https://img.shields.io/badge/Kakao-FFCD00?style=flat-square&logo=Kakaotalk&logoColor=black"> |
+
+### 외부 서비스 / 인프라
+| 분류 | 기술 |
+|---|---|
+| LLM 카피 생성 | <img src="https://img.shields.io/badge/AWS_Bedrock-FF9900?style=flat-square&logo=Amazon%20AWS&logoColor=white"> <img src="https://img.shields.io/badge/boto3-232F3E?style=flat-square&logo=Amazon%20AWS&logoColor=white"> |
+| 컨테이너 | <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white"> |
+| 백엔드 배포 | <img src="https://img.shields.io/badge/Railway-0B0D0E?style=flat-square&logo=Railway&logoColor=white"> |
+| 프론트 배포 | <img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=Vercel&logoColor=white"> |
 
 ## 시스템 아키텍처
 
 ```mermaid
 flowchart LR
-  U["후원자 CSV/Excel"] --> FE["React 대시보드<br/>(Vite + Tailwind)"]
-  FE -->|POST /predict/batch| API["FastAPI ml-backend"]
+  U["후원자 CSV/Excel"] --> FE["React 대시보드<br/>(Vercel 배포)"]
+  FE -->|POST /predict/batch| API["FastAPI ml-backend<br/>(Railway · Docker)"]
   API --> PRE["전처리 · 컬럼 매핑<br/>(column_map / preprocess)"]
   PRE --> MODEL["XGBoost_model_v2.joblib"]
   MODEL --> API
@@ -108,12 +140,15 @@ flowchart LR
   FE <-->|"Auth / 명단·활동 기록"| FIREBASE["Firebase<br/>Auth + Firestore"]
 ```
 
+- **Frontend**: [https://doeep.vercel.app/](https://doeep.vercel.app/) (Vercel)
+- **Backend**: Railway (`Dockerfile` + `railway.toml`, `/health`로 헬스체크)
+
 ## 핵심 기술 상세
 
 ### 1. 이탈 예측 모델 선정
 
 **어떤 문제였는가**
-GK2022 개인기부자 조사 데이터는 클래스 불균형(이탈 비율이 상대적으로 낮음)이 있어, 단순히 정확도만으로 모델을 고르면 실제로 중요한 "이탈할 사람"을 놓치기 쉬웠습니다.
+ 개인기부자 조사 데이터는 클래스 불균형(이탈 비율이 상대적으로 낮음)이 있어, 단순히 정확도만으로 모델을 고르면 실제로 중요한 "이탈할 사람"을 놓치기 쉬웠습니다.
 
 **어떤 대안을 검토했는가**
 
@@ -149,24 +184,34 @@ CSV 업로드 → 컬럼명 통일(한글 라벨 ↔ 설문 코드 ↔ 모델 �
 
 ```
 SKN34-2nd-6Team/
-├─ donor-churn-dashboard/        # React 프론트엔드 (Vite + Tailwind)
+├─ donor-churn-dashboard/        # React 프론트엔드 (Vite + Tailwind, Vercel 배포)
 │  └─ src/
-│     ├─ pages/                  # /daeho, /jeongseok, /hosun, /jinhwa, /jiyun
-│     ├─ components/{이름}/      # 담당자별 기능 컴포넌트
+│     ├─ pages/                  # DonorsPage, InsightsPage, ModelsPage, MyPage, HomePage …
+│     ├─ components/
+│     │  ├─ donors/               # 배치 예측 · 결과 테이블 · 후속 조치 (구 daeho)
+│     │  ├─ insights/              # 인구통계 이탈 통계 · 솔루션 (구 jeongseok)
+│     │  ├─ models/                # 모델 비교 · 히스토리 (구 hosun)
+│     │  ├─ home/                  # 랜딩 페이지 전용 컴포넌트
+│     │  └─ layout/, common/
 │     ├─ services/                # api.js, firebase.js, donorRosterDb.js 등
 │     ├─ context/AuthContext.jsx
 │     └─ data/                   # featureLinks.js, inferenceFields.js
-├─ ml-backend/                   # FastAPI 예측/카피 생성 API
+├─ ml-backend/                   # FastAPI 예측/카피 생성 API (Railway 배포)
 │  └─ app/
 │     ├─ api/routes.py
 │     └─ services/                # column_map.py, preprocess.py, predict.py, bedrock_copy.py
 ├─ ML/                            # 학습된 XGBoost 모델 (XGBoost_model_v2.joblib)
+├─ data/                          # 학습용 원본 엑셀 데이터 샘플
+├─ docs/                          # 브랜치·커밋 컨벤션 가이드
+├─ Dockerfile / railway.toml      # 백엔드 Railway 배포 설정
 ├─ requirements.txt               # 백엔드 의존성 (루트 단일)
 ├─ .env.example                   # 환경변수 템플릿 (루트 단일, 프론트/백엔드 공유)
 ├─ setup.ps1 / setup.sh
 ├─ run-backend.ps1 / run-backend.sh
 └─ structure.md                   # 팀 구현 가이드
 ```
+
+> `/daeho`, `/jeongseok`, `/hosun`, `/jiyun` 등 옛 경로는 각각 `/donors`, `/insights`, `/models`, `/mypage`로 리다이렉트됩니다 (`App.jsx`).
 
 ## 실행 방법
 
@@ -187,21 +232,24 @@ npm run dev           # http://localhost:5173
 
 macOS/Linux는 `./setup.sh`, `./run-backend.sh`를 사용하세요.
 
-> 이 프로젝트는 별도 Docker/인프라 구성 없이 로컬 `.venv` + Vite dev 서버로 실행됩니다.
-> <!-- TODO(팀): 배포 환경(예: Vercel/AWS 등)이 정해지면 이 섹션에 배포 방법 추가 -->
+### 배포
+
+- **프론트엔드**: [Vercel](https://doeep.vercel.app/) — `donor-churn-dashboard`를 정적/서버리스로 배포
+- **백엔드**: Railway — 루트 `Dockerfile`로 이미지를 빌드해 배포 (`railway.toml` 참고), `/health`로 헬스체크
+- CORS는 `ml-backend/app/main.py`에서 `https://doeep.vercel.app`을 기본 허용 오리진으로 등록해 두었고, 필요 시 `CORS_ORIGINS` 환경변수로 추가할 수 있습니다.
 
 ## 향후 계획 & 회고
 
 ### 향후 계획
-- [ ] `/jinhwa` 데이터 시각화 페이지 완성 및 main 병합
-- [ ] 로그인 가드 정식 활성화 (현재 개발 편의를 위해 대호 페이지 등 일부 비활성)
-- [ ] 모델 성능 고도화 (재현율 개선, 클래스 불균형 대응)
-- [ ] <!-- TODO(팀): 정량적 목표 추가 (예: 이탈 재현율 O%p 개선 등) -->
+- [ ] 관리자(운영자) 중심의 현재 페이지 구성에서 나아가, 실제 후원자(소비자) 입장에서 이용할 수 있는 페이지 제작
+- [ ] 요금제 설명 페이지 추가 (구독 플랜 안내)
+- [ ] 추천 액션의 효과 검증 — 문자/이메일 발송 등 조치 이후 실제 재후원 여부를 추적해 예측·솔루션의 신뢰도를 측정하는 폐루프 구축
+- [ ] 개인정보 보호·권한 관리 강화 — 운영자 역할별 접근 권한 분리, 연락처·소득 등 민감정보 마스킹/접근 로그 추가
 
 ### 팀원별 회고
 <!-- TODO(팀): 팀원별 한마디 추가 -->
 - 김대호:
-- 황호순:
+- 황호순: 팀장으로서 프로젝트를 이끌면서 브랜치 관리가 생각했던것보다 매끄럽게 되지 않았던점이 아쉽지만 팀원분들이 잘 따라와 주시고 소통이 잘되어 트러블이 적어 비교적 원만하게 프로젝트를 마무리 할 수 있었습니다.
 - 김진화:
-- 채정석:
+- 채정석: 주제가 빠르게 정해진 덕분에 프로젝트를 신속하게 진행할 수 있었습니다. 각자 맡은 부분을 진행하는 과정에서 비전공자로서 부족했던 부분을 팀원들이 채워주었고, 그 과정에서 함께 학습하며 성장할 수 있었던 좋은 기회였습니다. 특히 '기부자 이탈 관리'라는 흥미로운 주제를 머신러닝으로 학습시켜 이탈 가능성이 높은 대상을 예측하고, 이를 바탕으로 소비자와 관리자 양쪽 입장에서 활용 가능한 비즈니스 모델로 연결해본 과정과 결과는 값진 경험이었습니다.
 - 홍지윤:
