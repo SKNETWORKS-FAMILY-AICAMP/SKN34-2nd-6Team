@@ -159,3 +159,41 @@ export const inferenceFieldMeta = {
 export const REQUIRED_BATCH_COLUMNS = Object.entries(inferenceFieldMeta).map(
   ([key, meta]) => ({ key, label: meta.label }),
 )
+
+/** 한글 라벨 → options 맵 (프로필 요약 표시용) */
+const LABEL_OPTIONS = Object.fromEntries(
+  Object.values(inferenceFieldMeta)
+    .filter((meta) => Array.isArray(meta.options) && meta.options.length)
+    .map((meta) => [meta.label, meta.options]),
+)
+
+/**
+ * 프로필 요약 값 표시 — 코드형(성별·학력 등)은 한글 라벨, 그 외 숫자는 천단위 구분
+ * @param {string} label 프로필 키(한글 라벨)
+ * @param {unknown} value
+ */
+export function formatProfileDisplayValue(label, value) {
+  if (value == null || value === '') return '—'
+
+  const options = LABEL_OPTIONS[label]
+  if (options) {
+    const num = Number(value)
+    const hit = options.find((o) => Number(o.value) === num)
+    if (hit) return hit.label
+  }
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value.toLocaleString('ko-KR')
+  }
+
+  const asNum = Number(value)
+  if (typeof value === 'string' && value.trim() !== '' && Number.isFinite(asNum) && !options) {
+    // 순수 숫자 문자열(연령 등)만 포맷 — 코드형인데 매핑 실패하면 원문 유지
+    if (/^-?\d+(\.\d+)?$/.test(value.trim())) {
+      return asNum.toLocaleString('ko-KR')
+    }
+  }
+
+  return String(value)
+}
+

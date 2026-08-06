@@ -7,6 +7,7 @@ import Badge from '../common/Badge'
 import FollowUpActions from './FollowUpActions'
 import { riskLabel } from '../../utils/riskLabels'
 import { generateCopyDraft } from '../../services/api'
+import { formatProfileDisplayValue } from '../../data/inferenceFields'
 
 export default function DonorDetailDrawer({
   open,
@@ -225,9 +226,7 @@ export default function DonorDetailDrawer({
                   >
                     <dt className="text-slate-400">{label}</dt>
                     <dd className="text-right font-medium text-slate-800">
-                      {typeof value === 'number'
-                        ? value.toLocaleString('ko-KR')
-                        : String(value)}
+                      {formatProfileDisplayValue(label, value)}
                     </dd>
                   </div>
                 ))}
