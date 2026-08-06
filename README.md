@@ -71,8 +71,8 @@
 <td align="center"><img src="donor-churn-dashboard/public/team/hwanghosun.png" width="100" /></td>
 <td align="center"><img src="donor-churn-dashboard/public/team/kimdaeho.png" width="100" /></td>
 <td align="center"><img src="donor-churn-dashboard/public/team/kimjinhwa.png" width="100" /></td>
-<td align="center"><img src="donor-churn-dashboard/public/team/chaejeongseok.png" width="100" /></td>
 <td align="center"><img src="donor-churn-dashboard/public/team/hongjiyun.png" width="100" /></td>
+<td align="center"><img src="donor-churn-dashboard/public/team/chaejeongseok.png" width="100" /></td>
 </tr>
 <tr>
 <td align="center"><b>황호순 (팀장)</b></td>
