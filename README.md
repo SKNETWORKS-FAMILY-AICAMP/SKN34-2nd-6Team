@@ -51,6 +51,7 @@
 </p>
 
 ---
+<h2 align="center">가족사진</h2>
 
 <p align="center">
   <img src="docs/doraemon-family-photo.png" alt="두잎 팀 가족사진" width="680" />
