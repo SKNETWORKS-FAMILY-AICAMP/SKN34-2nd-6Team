@@ -24,14 +24,6 @@
 
 ---
 
-<p align="center">
-  <a href="data/01_데이터_전처리_결과서.md">데이터 전처리 결과서</a>
-  &nbsp;·&nbsp;
-  <a href="data/02_모델_학습결과서.md">모델 학습결과서</a>
-  &nbsp;·&nbsp;
-  <a href="data/03_모델_메타데이터.md">모델 메타데이터</a>
-</p>
-
 <h2 align="center">목차</h2>
 
 <p align="center">
@@ -59,6 +51,12 @@
 </p>
 
 ---
+
+<p align="center">
+  <img src="docs/doraemon-family-photo.png" alt="두잎 팀 가족사진" width="680" />
+</p>
+
+<br />
 
 <h2 align="center">팀 소개</h2>
 
@@ -112,6 +110,8 @@
 </table>
 
 </div>
+
+---
 
 <h3 align="center">담당 파트</h3>
 
